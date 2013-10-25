@@ -30,11 +30,18 @@ public:
 	virtual ~Object();
 	void allPlots(AllSamples samples);
 protected:
+	TString objName;
 	TLegend* legend(AllSamples samples);
 	TText* doPrelim(double x_pos,double y_pos);
 	TText* doChan(double x_pos,double y_pos);
 	TH1D* readGe2bHistogram(Sample sample, Variable variable);
+	void readHistos(AllSamples samples, Variable variable);
 	THStack* buildStack(AllSamples samples, Variable variable);
+	TH1D* allMChisto(AllSamples samples, Variable variable);
+	TH1D* hashErrors(AllSamples samples, Variable variable);
+	void addOverFlow(TH1D* overflow, Variable variable);
+	void standardPlot(TH1D* data, THStack *hs, AllSamples samples, Variable variable);
+	void ratioPlot(TH1D* data, THStack *hs, AllSamples samples, Variable variable);
 	void savePlot(AllSamples samples, Variable variable);
 };
 

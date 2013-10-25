@@ -8,11 +8,12 @@
 
 #include <iostream>
 #include "../interface/Objects/MET.h"
+#include "../interface/Objects/Jets.h"
 
 using namespace std;
 
 int main() {
-	//Have to make a dummy histogram so that everything works. Silly root
+	//Have to make a dummy histogram so that everything works. Silly ROOT
 	TH1F* dummy = new TH1F("dummy", "dummy", 10, 0, 1);
 	delete dummy;
 
@@ -20,6 +21,9 @@ int main() {
 
 	MET met;
 	met.allPlots(samples);
+
+	Jets jets;
+	jets.allPlots(samples);
 
 	return 0;
 

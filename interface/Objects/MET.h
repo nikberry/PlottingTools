@@ -17,13 +17,8 @@ public:
 	MET();
 	virtual ~MET();
 	void allPlots(AllSamples samples);
-//private:
-//	TLegend* legend(AllSamples samples);
-//	TText* doPrelim(double x_pos,double y_pos);
-//	TText* doChan(double x_pos,double y_pos);
-//	TH1D* readGe2bHistogram(Sample sample, Variable variable);
-//	THStack* buildStack(AllSamples samples, Variable variable);
-//	void savePlot(AllSamples samples, Variable variable);
+private:
+	void setMetType(TString metType);
 };
 
 } /* namespace std */
