@@ -9,6 +9,7 @@
 #include <iostream>
 #include "../interface/Objects/MET.h"
 #include "../interface/Objects/Jets.h"
+#include "../interface/Objects/CutFlow.h"
 
 using namespace std;
 
@@ -19,11 +20,14 @@ int main() {
 
 	AllSamples samples;
 
-	MET met;
-	met.allPlots(samples);
+//	MET met;
+//	met.allPlots(samples);
+//
+//	Jets jets;
+//	jets.allPlots(samples);
 
-	Jets jets;
-	jets.allPlots(samples);
+	CutFlow cutflow;
+	cutflow.allPlots(samples);
 
 	return 0;
 

@@ -16,6 +16,7 @@ struct Globals {
 	static bool addRatioPlot;
 	static bool addHashErrors;
 	static bool addOverFlow;
+	static bool doLogPlot;
 	static TString lumi;
 };
 

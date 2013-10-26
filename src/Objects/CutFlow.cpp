@@ -1,11 +1,11 @@
 /*
- * Object.cpp
+ * CutFlow.cpp
  *
- *  Created on: Oct 18, 2013
+ *  Created on: Oct 26, 2013
  *      Author: philip
  */
 
-#include "../../interface/Objects/Object.h"
+#include "../../interface/Objects/CutFlow.h"
 #include "TCanvas.h"
 #include "TPad.h"
 #include "TLatex.h"
@@ -16,75 +16,61 @@
 
 namespace std {
 
-Object::Object() {
-	objName = "";
-	selection = "TTbar_plus_X_analysis/MuPlusJets/Ref selection/";
-}
-
-Object::~Object() {
+CutFlow::CutFlow() {
+	// TODO Auto-generated constructor stub
+	objName = "CutFlow";
+	selection = "EventCount";
 
 }
 
-void Object::savePlot(AllSamples samples, Variable variable){
+CutFlow::~CutFlow() {
+	// TODO Auto-generated destructor stub
+}
 
-	readHistos(samples, variable);
+void CutFlow::allPlots(AllSamples samples){
+
+//  Variable::Variable(TString name_temp, TString xTitle_temp, double minX_temp, double maxX_temp, int rebinFact_temp)
+	Variable ttbar("TTbarMuPlusJetsRefSelection", "selection step", -1.5, 9.5, 1);
+	saveCutFlowPlot(samples, ttbar);
+
+}
+
+void CutFlow::saveCutFlowPlot(AllSamples samples, Variable variable){
+
+	readCutFlowHistos(samples, variable);
 
 	TH1D* data = samples.single_mu_data->histo;
 	THStack *hs = buildStack(samples, variable);
 
-	standardPlot(data, hs, samples, variable);
+	standardCutFlowPlot(data, hs, samples, variable);
 
 	if(Globals::addRatioPlot){
-		ratioPlot(data, hs, samples, variable);
+		ratioCutFlowPlot(data, hs, samples, variable);
 	}
 
 	delete data;
 	delete hs;
 }
 
-TH1D* Object::readHistogram(Sample sample, Variable variable) {
+TH1D* CutFlow::readCutFlowHistogram(Sample sample, Variable variable) {
 
-	cout << "plot: " << selection+objName+"/"+variable.name << endl;
+	cout << "plot: " << selection+"/"+variable.name << endl;
 
-	TH1D* plot = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_2btags");
-	TH1D* plot2 = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_3btags");
-	TH1D* plot3 = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_4orMoreBtags");
-
-	plot->Add(plot2);
-	plot->Add(plot3);
+	TH1D* plot = (TH1D*) sample.file->Get(selection+"/"+variable.name);
 
 	plot->SetFillColor(sample.fillColor);
 	plot->SetLineColor(sample.lineColor);
 
-	if(Globals::addOverFlow)
-		addOverFlow(plot, variable);
-
-	plot->Rebin(variable.rebinFact);
-
 	return plot;
 }
 
-void Object::addOverFlow(TH1D* overflow, Variable variable){
+void CutFlow::readCutFlowHistos(AllSamples samples, Variable variable){
 
-	if(variable.minX > -0.1){
-		int bin = variable.maxX/overflow->GetBinWidth(1);
-		double error;
-
-		double overflow_val = overflow->IntegralAndError(bin, overflow->GetNbinsX()+1, error);
-
-		overflow->SetBinContent(bin, overflow_val);
-		overflow->SetBinError(bin, error);
-	}
-}
-
-
-void Object::readHistos(AllSamples samples, Variable variable){
-
-	TH1D* data = readHistogram(*samples.single_mu_data, variable);
-	TH1D* ttbar = readHistogram(*samples.ttbar, variable);
-	TH1D* single_t = readHistogram(*samples.single_t, variable);
-	TH1D* vjets = readHistogram(*samples.vjets, variable);
-	TH1D* qcd = readHistogram(*samples.qcd, variable);
+	TH1D* data = readCutFlowHistogram(*samples.single_mu_data, variable);
+	TH1D* ttbar = readCutFlowHistogram(*samples.ttbar, variable);
+	TH1D* single_t = readCutFlowHistogram(*samples.single_t, variable);
+	TH1D* vjets = readCutFlowHistogram(*samples.vjets, variable);
+	TH1D* qcd = readCutFlowHistogram(*samples.qcd, variable);
 
 	samples.single_mu_data->SetHisto(data);
 	samples.ttbar->SetHisto(ttbar);
@@ -93,7 +79,7 @@ void Object::readHistos(AllSamples samples, Variable variable){
 	samples.qcd->SetHisto(qcd);
 }
 
-THStack* Object::buildStack(AllSamples samples, Variable variable){
+THStack* CutFlow::buildStack(AllSamples samples, Variable variable){
 
 	THStack *hs = new THStack("hs","test");
 
@@ -105,7 +91,7 @@ THStack* Object::buildStack(AllSamples samples, Variable variable){
 	return hs;
 }
 
-TH1D* Object::allMChisto(AllSamples samples, Variable variable){
+TH1D* CutFlow::allMChisto(AllSamples samples, Variable variable){
 
 	TH1D *allMC = (TH1D*)samples.ttbar->histo->Clone("ratio plot");
 
@@ -116,7 +102,7 @@ TH1D* Object::allMChisto(AllSamples samples, Variable variable){
 	return allMC;
 }
 
-void Object::standardPlot(TH1D* data, THStack *hs, AllSamples samples, Variable variable){
+void CutFlow::standardCutFlowPlot(TH1D* data, THStack *hs, AllSamples samples, Variable variable){
 	//Style
 	TdrStyle style;
 	style.setTDRStyle();
@@ -126,6 +112,8 @@ void Object::standardPlot(TH1D* data, THStack *hs, AllSamples samples, Variable 
 
 	data->Draw();
 	hs->Draw("hist");
+
+	setBinLabels(hs, data);
 
 	if(Globals::addHashErrors){
 		TH1D* hashErrs = hashErrors(samples, variable);
@@ -149,8 +137,6 @@ void Object::standardPlot(TH1D* data, THStack *hs, AllSamples samples, Variable 
 	TText* textPrelim = doPrelim(0.58,0.96);
 	textPrelim->Draw();
 
-	cout << "saving plot shit" << endl;
-
 	if(Globals::doLogPlot){
 		c1->SetLogy();
 		c1->SaveAs("Plots/ControlPlots/"+objName+"/Log/"+variable.name+".png");
@@ -166,7 +152,7 @@ void Object::standardPlot(TH1D* data, THStack *hs, AllSamples samples, Variable 
 	delete textPrelim;
 }
 
-void Object::ratioPlot(TH1D* data, THStack *hs, AllSamples samples, Variable variable){
+void CutFlow::ratioCutFlowPlot(TH1D* data, THStack *hs, AllSamples samples, Variable variable){
 	//draw histos with ratio plot
 	float r = 0.3;
 	float epsilon = 0.02;
@@ -220,12 +206,9 @@ void Object::ratioPlot(TH1D* data, THStack *hs, AllSamples samples, Variable var
 	ratio->SetMaximum(2);
 	ratio->SetMinimum(0.);
 
+	setBinLabels(hs, ratio);
+
 //	Will need to see if this works in other situations
-	if(variable.minX < 0. && ratio->GetBinWidth(1)){
-		ratio->SetAxisRange(variable.minX+ratio->GetBinWidth(1)/2, fabs(variable.minX+ratio->GetBinWidth(1)/2));
-	}else{
-		ratio->SetAxisRange(0, variable.maxX-ratio->GetBinWidth(1)/2);
-	}
 
 	ratio->SetLabelSize(0.1, "X");
 	ratio->SetTitleOffset(0.5, "Y");
@@ -255,7 +238,7 @@ void Object::ratioPlot(TH1D* data, THStack *hs, AllSamples samples, Variable var
 	delete textPrelim;
 }
 
-TH1D* Object::hashErrors(AllSamples samples, Variable variable){
+TH1D* CutFlow::hashErrors(AllSamples samples, Variable variable){
 	TH1D * hashErrors = allMChisto(samples, variable);
 
 	hashErrors->SetFillColor(kBlack);
@@ -266,7 +249,7 @@ TH1D* Object::hashErrors(AllSamples samples, Variable variable){
 	return hashErrors;
 }
 
-TLegend* Object::legend(AllSamples samples){
+TLegend* CutFlow::legend(AllSamples samples){
 
 		TLegend *tleg;
 		tleg = new TLegend(0.75,0.75,0.85,0.9);
@@ -282,7 +265,7 @@ TLegend* Object::legend(AllSamples samples){
 		return tleg;
 }
 
-TText* Object::doChan(double x_pos,double y_pos){
+TText* CutFlow::doChan(double x_pos,double y_pos){
 
 	  ostringstream stream;
 	  stream  << "#mu, #geq 4 jets, #geq 2 btags";
@@ -295,7 +278,7 @@ TText* Object::doChan(double x_pos,double y_pos){
 	  return text;
 }
 
-TText* Object::doPrelim(double x_pos,double y_pos){
+TText* CutFlow::doPrelim(double x_pos,double y_pos){
 
 	  ostringstream stream;
 	  stream  << "CMS Preliminary, L = "+Globals::lumi;
@@ -308,8 +291,17 @@ TText* Object::doPrelim(double x_pos,double y_pos){
 	  return text;
 }
 
-void Object::setSelection(TString sel_name){
+void CutFlow::setSelection(TString sel_name){
 	selection = sel_name;
+}
+
+void CutFlow::setBinLabels(THStack* hs, TH1D* data){
+	TString step[11] = {"Skim" ,"Cleaning and HLT","one isolated #mu", "loose #mu veto", "loose e veto", "#geq 1 jets", "#geq 2 jets","#geq 3 jets", "#geq 4 jets", "#geq1 CSV b-tag", "#geq2 CSV b-tag" };
+	for(int i =0; i<data->GetNbinsX(); i++){
+		hs->GetXaxis()->SetBinLabel(i+1, step[i]);
+		data->GetXaxis()->SetBinLabel(i+1, step[i]);
+	}
+
 }
 
 } /* namespace std */

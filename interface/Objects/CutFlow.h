@@ -1,7 +1,7 @@
 /*
- * Object.h
+ * CutFlow.h
  *
- *  Created on: Oct 18, 2013
+ *  Created on: Oct 26, 2013
  *      Author: philip
  */
 
@@ -20,33 +20,33 @@
 #include "../../interface/Variables/Variable.h"
 #include "../../interface/Objects/TdrStyle.h"
 
-#ifndef OBJECT_H_
-#define OBJECT_H_
+#ifndef CUTFLOW_H_
+#define CUTFLOW_H_
 
 namespace std {
 
-class Object {
+class CutFlow {
 public:
-	Object();
-	virtual ~Object();
+	CutFlow();
+	virtual ~CutFlow();
 	void allPlots(AllSamples samples);
-protected:
+private:
 	TString objName;
 	TString selection;
 	void setSelection(TString sel_name);
 	TLegend* legend(AllSamples samples);
 	TText* doPrelim(double x_pos,double y_pos);
 	TText* doChan(double x_pos,double y_pos);
-	TH1D* readHistogram(Sample sample, Variable variable);
-	void readHistos(AllSamples samples, Variable variable);
 	THStack* buildStack(AllSamples samples, Variable variable);
 	TH1D* allMChisto(AllSamples samples, Variable variable);
 	TH1D* hashErrors(AllSamples samples, Variable variable);
-	void addOverFlow(TH1D* overflow, Variable variable);
-	void standardPlot(TH1D* data, THStack *hs, AllSamples samples, Variable variable);
-	void ratioPlot(TH1D* data, THStack *hs, AllSamples samples, Variable variable);
-	void savePlot(AllSamples samples, Variable variable);
+	TH1D* readCutFlowHistogram(Sample sample, Variable variable);
+	void readCutFlowHistos(AllSamples samples, Variable variable);
+	void saveCutFlowPlot(AllSamples samples, Variable variable);
+	void setBinLabels(THStack* hs, TH1D* data);
+	void standardCutFlowPlot(TH1D* data, THStack *hs, AllSamples samples, Variable variable);
+	void ratioCutFlowPlot(TH1D* data, THStack *hs, AllSamples samples, Variable variable);
 };
 
 } /* namespace std */
-#endif /* OBJECT_H_ */
+#endif /* CUTFLOW_H_ */

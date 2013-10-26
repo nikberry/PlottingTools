@@ -10,7 +10,6 @@
 namespace std {
 
 AllSamples::AllSamples() {
-	// TODO Auto-generated constructor stub
 
 	single_mu_data = new Sample;
 	Sample data_temp("SingleMu", kBlack, kBlack);
