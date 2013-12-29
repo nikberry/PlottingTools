@@ -1,9 +1,12 @@
 /*
- * Object.h
+ * Fit.h
  *
- *  Created on: Oct 18, 2013
+ *  Created on: Dec 24, 2013
  *      Author: philip
  */
+
+#ifndef FIT_H_
+#define FIT_H_
 
 #include "TString.h"
 #include "TFile.h"
@@ -12,7 +15,10 @@
 #include "THStack.h"
 #include "TLegend.h"
 #include "TText.h"
-
+#include <TMinuit.h>
+#include <TMath.h>
+#include "TObject.h"
+#include "TROOT.h"
 #include <iostream>
 
 #include "../../interface/GlobalVariables.h"
@@ -20,15 +26,12 @@
 #include "../../interface/Variables/Variable.h"
 #include "../../interface/Objects/TdrStyle.h"
 
-#ifndef OBJECT_H_
-#define OBJECT_H_
-
 namespace std {
 
-class Object {
+class Fit{
 public:
-	Object();
-	virtual ~Object();
+	Fit();
+	virtual ~Fit();
 	void allPlots(AllSamples samples);
 	void readHistos(AllSamples samples, Variable variable);
 protected:
@@ -47,7 +50,11 @@ protected:
 	void standardPlot(TH1D* data, THStack *hs, AllSamples samples, Variable variable);
 	void ratioPlot(TH1D* data, THStack *hs, AllSamples samples, Variable variable);
 	void savePlot(AllSamples samples, Variable variable);
+	void doFit(AllSamples samples, Variable variable);
+	void drawTemplates(AllSamples samples, Variable variable);
+	void normAndColor(TH1D* hist, Sample sample);
+//	void fcn(int& npar, double* deriv, double& f, double par[], int flags);
 };
 
 } /* namespace std */
-#endif /* OBJECT_H_ */
+#endif /* FIT_H_ */

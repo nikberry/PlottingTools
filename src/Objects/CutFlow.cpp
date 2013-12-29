@@ -48,6 +48,8 @@ void CutFlow::saveCutFlowPlot(AllSamples samples, Variable variable){
 		ratioCutFlowPlot(data, hs, samples, variable);
 	}
 
+	writeTable(samples, variable);
+
 	delete data;
 	delete hs;
 }
@@ -93,7 +95,7 @@ THStack* CutFlow::buildStack(AllSamples samples, Variable variable){
 
 TH1D* CutFlow::allMChisto(AllSamples samples, Variable variable){
 
-	TH1D *allMC = (TH1D*)samples.ttbar->histo->Clone("ratio plot");
+	TH1D *allMC = (TH1D*)samples.ttbar->histo->Clone("all mc");
 
 	allMC->Add(samples.qcd->histo);
 	allMC->Add(samples.vjets->histo);
@@ -137,14 +139,9 @@ void CutFlow::standardCutFlowPlot(TH1D* data, THStack *hs, AllSamples samples, V
 	TText* textPrelim = doPrelim(0.58,0.96);
 	textPrelim->Draw();
 
-	if(Globals::doLogPlot){
-		c1->SetLogy();
-		c1->SaveAs("Plots/ControlPlots/"+objName+"/Log/"+variable.name+".png");
-		c1->SaveAs("Plots/ControlPlots/"+objName+"/Log/"+variable.name+".pdf");
-	}else{
-		c1->SaveAs("Plots/ControlPlots/"+objName+"/"+variable.name+".png");
-		c1->SaveAs("Plots/ControlPlots/"+objName+"/"+variable.name+".pdf");
-	}
+	c1->SetLogy();
+	c1->SaveAs("Plots/ControlPlots/"+objName+"/Log/"+variable.name+".png");
+	c1->SaveAs("Plots/ControlPlots/"+objName+"/Log/"+variable.name+".pdf");
 
 	delete c1;
 	delete leg;
@@ -201,6 +198,10 @@ void CutFlow::ratioCutFlowPlot(TH1D* data, THStack *hs, AllSamples samples, Vari
 	TH1D * ratio = (TH1D*)data->Clone("ratio plot");
 	ratio->Sumw2();
 	ratio->SetStats(0);
+
+	cout << "ratio bins: " << ratio->GetNbinsX() << endl;
+	cout << "all mc bins: " << allMC->GetNbinsX() << endl;
+
 	ratio->Divide(allMC);
 
 	ratio->SetMaximum(2);
@@ -223,14 +224,9 @@ void CutFlow::ratioCutFlowPlot(TH1D* data, THStack *hs, AllSamples samples, Vari
 
 	pad1->cd();
 
-	if(Globals::doLogPlot){
-		pad1->SetLogy();
-		c2->SaveAs("Plots/ControlPlots/"+objName+"/Log/"+variable.name+"_ratio.png");
-		c2->SaveAs("Plots/ControlPlots/"+objName+"/Log/"+variable.name+"_ratio.pdf");
-	}else{
-		c2->SaveAs("Plots/ControlPlots/"+objName+"/"+variable.name+"_ratio.png");
-		c2->SaveAs("Plots/ControlPlots/"+objName+"/"+variable.name+"_ratio.pdf");
-	}
+	pad1->SetLogy();
+	c2->SaveAs("Plots/ControlPlots/"+objName+"/Log/"+variable.name+"_ratio.png");
+	c2->SaveAs("Plots/ControlPlots/"+objName+"/Log/"+variable.name+"_ratio.pdf");
 
 	delete c2;
 	delete leg;
@@ -263,6 +259,21 @@ TLegend* CutFlow::legend(AllSamples samples){
 		tleg->AddEntry(samples.qcd->histo, "QCD"      , "f");
 
 		return tleg;
+}
+
+void CutFlow::writeTable(AllSamples samples, Variable variable){
+    std::cout.setf(std::ios::fixed);
+    std::cout.precision(0);
+
+    TH1D * allMC = allMChisto(samples, variable);
+
+    TString step[11] = {"Skim" ,"Cleaning and HLT","one isolated #mu", "loose #mu veto", "loose e veto", "#geq 1 jets", "#geq 2 jets","#geq 3 jets", "#geq 4 jets", "#geq1 CSV b-tag", "#geq2 CSV b-tag" };
+    cout << " & ttbar & v+jets & single-t & qcd & all MC & data " << endl;
+
+    for(int i = 0; i < samples.ttbar->histo->GetNbinsX(); i++){
+    	cout << step[i] << " & " << samples.ttbar->histo->GetBinContent(i+1) << " $\\pm$ " << samples.ttbar->histo->GetBinError(i+1)  << " & " << samples.vjets->histo->GetBinContent(i+1) << " $\\pm$ " << samples.vjets->histo->GetBinError(i+1)   << " & " << samples.single_t->histo->GetBinContent(i+1) << " $\\pm$ " << samples.single_t->histo->GetBinError(i+1)  << " & " << samples.qcd->histo->GetBinContent(i+1) << " $\\pm$ " << samples.qcd->histo->GetBinError(i+1)  << " & " << allMC->GetBinContent(i+1) << " $\\pm$ " << allMC->GetBinError(i+1)  << " & " << samples.single_mu_data->histo->GetBinContent(i+1) << " $\\pm$ " << samples.single_mu_data->histo->GetBinError(i+1)  << endl;
+
+    }
 }
 
 TText* CutFlow::doChan(double x_pos,double y_pos){

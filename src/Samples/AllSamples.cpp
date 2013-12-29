@@ -23,6 +23,10 @@ AllSamples::AllSamples() {
 	Sample single_t_temp("SingleTop", kMagenta, kBlack);
 	*single_t = single_t_temp;
 
+	signal = new Sample;
+	Sample signal_temp("TTJet", kRed, kBlack);
+	*ttbar = signal_temp;
+
 	vjets = new Sample;
 	Sample vjets_temp("VJets", kGreen-3, kBlack);
 	*vjets = vjets_temp;

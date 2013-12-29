@@ -9,6 +9,7 @@
 #define ALLSAMPLES_H_
 
 #include "Sample.h"
+#include "TObject.h"
 
 namespace std {
 
@@ -20,6 +21,7 @@ public:
 	Sample* single_mu_data;
 	Sample* ttbar;
 	Sample* single_t;
+	Sample* signal;
 	Sample* vjets;
 	Sample* qcd;
 };

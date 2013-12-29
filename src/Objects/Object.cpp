@@ -19,6 +19,7 @@ namespace std {
 Object::Object() {
 	objName = "";
 	selection = "TTbar_plus_X_analysis/MuPlusJets/Ref selection/";
+	folder = "ControlPlots";
 }
 
 Object::~Object() {
@@ -149,15 +150,13 @@ void Object::standardPlot(TH1D* data, THStack *hs, AllSamples samples, Variable 
 	TText* textPrelim = doPrelim(0.58,0.96);
 	textPrelim->Draw();
 
-	cout << "saving plot shit" << endl;
-
 	if(Globals::doLogPlot){
 		c1->SetLogy();
-		c1->SaveAs("Plots/ControlPlots/"+objName+"/Log/"+variable.name+".png");
-		c1->SaveAs("Plots/ControlPlots/"+objName+"/Log/"+variable.name+".pdf");
+		c1->SaveAs("Plots/"+folder+"/"+objName+"/Log/"+variable.name+".png");
+		c1->SaveAs("Plots/"+folder+"/"+objName+"/Log/"+variable.name+".pdf");
 	}else{
-		c1->SaveAs("Plots/ControlPlots/"+objName+"/"+variable.name+".png");
-		c1->SaveAs("Plots/ControlPlots/"+objName+"/"+variable.name+".pdf");
+		c1->SaveAs("Plots/"+folder+"/"+objName+"/"+variable.name+".png");
+		c1->SaveAs("Plots/"+folder+"/"+objName+"/"+variable.name+".pdf");
 	}
 
 	delete c1;
@@ -242,11 +241,11 @@ void Object::ratioPlot(TH1D* data, THStack *hs, AllSamples samples, Variable var
 
 	if(Globals::doLogPlot){
 		pad1->SetLogy();
-		c2->SaveAs("Plots/ControlPlots/"+objName+"/Log/"+variable.name+"_ratio.png");
-		c2->SaveAs("Plots/ControlPlots/"+objName+"/Log/"+variable.name+"_ratio.pdf");
+		c2->SaveAs("Plots/"+folder+"/"+objName+"/Log/"+variable.name+"_ratio.png");
+		c2->SaveAs("Plots/"+folder+"/"+objName+"/Log/"+variable.name+"_ratio.pdf");
 	}else{
-		c2->SaveAs("Plots/ControlPlots/"+objName+"/"+variable.name+"_ratio.png");
-		c2->SaveAs("Plots/ControlPlots/"+objName+"/"+variable.name+"_ratio.pdf");
+		c2->SaveAs("Plots/"+folder+"/"+objName+"/"+variable.name+"_ratio.png");
+		c2->SaveAs("Plots/"+folder+"/"+objName+"/"+variable.name+"_ratio.pdf");
 	}
 
 	delete c2;

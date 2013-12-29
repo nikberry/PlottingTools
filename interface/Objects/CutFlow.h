@@ -46,6 +46,7 @@ private:
 	void setBinLabels(THStack* hs, TH1D* data);
 	void standardCutFlowPlot(TH1D* data, THStack *hs, AllSamples samples, Variable variable);
 	void ratioCutFlowPlot(TH1D* data, THStack *hs, AllSamples samples, Variable variable);
+	void writeTable(AllSamples samples, Variable variable);
 };
 
 } /* namespace std */

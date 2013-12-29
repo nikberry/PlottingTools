@@ -8,8 +8,10 @@
 
 #include <iostream>
 #include "../interface/Objects/MET.h"
+#include "../interface/Objects/Muon.h"
 #include "../interface/Objects/Jets.h"
 #include "../interface/Objects/CutFlow.h"
+#include "../interface/Objects/Fit.h"
 
 using namespace std;
 
@@ -25,6 +27,12 @@ int main() {
 //
 //	Jets jets;
 //	jets.allPlots(samples);
+
+//	Muon muon;
+//	muon.allPlots(samples);
+
+	Fit fit;
+	fit.allPlots(samples);
 
 	CutFlow cutflow;
 	cutflow.allPlots(samples);
