@@ -1,0 +1,4 @@
+Purpose: To cross check ttbar x-section measurment in M_lb, M_3, and eta distributions.
+
+nTuples exist in:
+/data1/DiffAnalysis/rootFiles

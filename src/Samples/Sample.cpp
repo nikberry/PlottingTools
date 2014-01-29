@@ -12,7 +12,7 @@ namespace std {
 
 Sample::Sample() {
 
-	file = new TFile;// ("~/workspace/TtbarWork/rootFilesV4/central/TTJet_19584pb_PFElectron_PFMuon_PF2PATJets_PFMET.root");
+	file = new TFile;// ("/data1/DiffAnalysis/rootFiles/central/TTJet_19584pb_PFElectron_PFMuon_PF2PATJets_PFMET.root");
 	histo = new TH1D;
 	histo_ge4j = new TH1D;
 	fillColor = kRed;
@@ -21,8 +21,8 @@ Sample::Sample() {
 }
 
 Sample::Sample(TString sample, Color_t fColor, Color_t lColor, TString systematic, TString eSystematic) {
-	cout << "Getting file: " << "~/workspace/TtbarWork/rootFilesV4/"+systematic+"/"+sample + "_19584pb_PFElectron_PFMuon_PF2PATJets_PFMET.root" << endl;
-	file = new TFile ("~/workspace/TtbarWork/rootFilesV4/"+systematic+"/" + sample + "_19584pb_PFElectron_PFMuon_PF2PATJets_PFMET"+eSystematic+".root");
+	cout << "Getting file: " << "/data1/DiffAnalysis/rootFiles/"+systematic+"/"+sample + "_19584pb_PFElectron_PFMuon_PF2PATJets_PFMET.root" << endl;
+	file = new TFile ("/data1/DiffAnalysis/rootFiles/"+systematic+"/" + sample + "_19584pb_PFElectron_PFMuon_PF2PATJets_PFMET"+eSystematic+".root");
 	histo = new TH1D;
 	histo_ge4j = new TH1D;
 	fillColor = fColor;
