@@ -21,6 +21,7 @@ MET::~MET() {
 void MET::allPlots(AllSamples samples){
 
 	setMetType("patType1CorrectedPFMet");
+	//setMetType("recoMetPFlow");
 
 //  Variable::Variable(TString name_temp, TString xTitle_temp, double minX_temp, double maxX_temp, int rebinFact_temp)
 	Variable met;
@@ -29,7 +30,7 @@ void MET::allPlots(AllSamples samples){
 	Variable met_sig("METsignificance", "E_{T}^{miss} significance", 0, 150, 2);
 	savePlot(samples, met_sig);
 
-	Variable st("ST", "ST [GeV]", 0, 1500, 2);
+	Variable st("ST", "ST [GeV]", 0, 1500, 10);
 	savePlot(samples, st);
 
 	Variable wpt("WPT", "p_{T}(W) [GeV]", 0, 300, 5);

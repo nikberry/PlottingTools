@@ -15,5 +15,6 @@ bool Globals::addRatioPlot = true;
 bool Globals::addHashErrors= true;
 bool Globals::addOverFlow = true;
 bool Globals::doLogPlot = false;
+bool Globals::qcdFromData =true;
 
 } /* namespace std */

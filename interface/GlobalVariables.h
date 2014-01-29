@@ -17,6 +17,7 @@ struct Globals {
 	static bool addHashErrors;
 	static bool addOverFlow;
 	static bool doLogPlot;
+	static bool qcdFromData;
 	static TString lumi;
 };
 

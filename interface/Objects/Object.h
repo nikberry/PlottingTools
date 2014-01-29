@@ -31,11 +31,12 @@ public:
 	virtual ~Object();
 	void allPlots(AllSamples samples);
 	void readHistos(AllSamples samples, Variable variable);
+	void setSelection(TString sel_name);
+	TH1D* qcdHisto(AllSamples samples, Variable variable);
 protected:
 	TString objName;
 	TString selection;
 	TString folder;
-	void setSelection(TString sel_name);
 	TLegend* legend(AllSamples samples);
 	TText* doPrelim(double x_pos,double y_pos);
 	TText* doChan(double x_pos,double y_pos);

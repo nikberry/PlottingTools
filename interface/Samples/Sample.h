@@ -17,11 +17,14 @@ namespace std {
 class Sample {
 public:
 	Sample();
-	Sample(TString sample, Color_t fColor, Color_t lColor);
+	Sample(TString sample, Color_t fColor, Color_t lColor, TString systematic, TString eSystematic);
 	virtual ~Sample();
 	TFile* file;
 	TH1D* histo;
+	TH1D* histo_ge4j;
+	TString name;
 	void SetHisto(TH1D* plot);
+	void SetHistoGe4j(TH1D* plot);
 	void SetFillColor(Color_t fcolor); //pub or priv?
 	Color_t GetFillColor();
 	void SetLineColor(Color_t fcolor); //pub or priv?

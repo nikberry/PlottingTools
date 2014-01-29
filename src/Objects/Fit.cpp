@@ -11,12 +11,12 @@
 #include "TLatex.h"
 #include "TLine.h"
 #include "TObjArray.h"
-#include "TMap.h"
 #include "TVirtualFitter.h"
-#include "TFitterMinuit.h"
 #include <sstream>
 #include <iomanip>
 #include <math.h>
+
+#include "../../interface/Objects/Muon.h"
 
 namespace std {
 
@@ -77,17 +77,63 @@ Fit::~Fit() {
 }
 
 
-void Fit::allPlots(AllSamples samples){
+void Fit::allFits(){
 	Variable absEta("muon_AbsEta", "muon |#eta|", 0, 2.6, 10);
-	//standard plot without fit
-	savePlot(samples, absEta);
+	//fits only save standard plot if doFit 3rd arg is "central"
+
+	std::vector<double> xsects;
+	//could perhaps turn this into an iterator over all samples
+	AllSamples samples("central", "");
+	xsects.push_back(readAndFit(samples, absEta, "central"));
+
+	AllSamples jesUp("JES_up", "_plusJES");
+	xsects.push_back(readAndFit(jesUp, absEta, "JES_up"));
+
+	AllSamples jesDown("JES_down", "_minusJES");
+	xsects.push_back(readAndFit(jesDown, absEta, "JES_down"));
+
+	AllSamples jerUp("JER_up", "_plusJER");
+	xsects.push_back(readAndFit(jerUp, absEta, "JER_up"));
+
+	AllSamples jerDown("JER_down", "_minusJER");
+	xsects.push_back(readAndFit(jerDown, absEta, "JER_down"));
+
+	AllSamples puUp("PU_up", "_PU_72765mb");
+	xsects.push_back(readAndFit(puUp, absEta, "PU_up"));
+
+	AllSamples pudown("PU_down", "_PU_65835mb");
+	xsects.push_back(readAndFit(pudown, absEta, "PU_down"));
+
+	AllSamples bjetUp("BJet_up", "_plusBjet");
+	xsects.push_back(readAndFit(bjetUp, absEta, "BJet_up"));
+
+	AllSamples bjetDown("BJet_down", "_minusBJet");
+	xsects.push_back(readAndFit(bjetDown, absEta, "BJet_down"));
+
+//	AllSamples ljetUp("LightJet_up", "_plusLightJet");
+//	xsects.push_back(readAndFit(ljetUp, absEta, "LightJet_up"));
+//
+//	AllSamples ljetDown("LightJet_down", "_minusLightJet");
+//	xsects.push_back(readAndFit(ljetDown, absEta, "LightJet_down"));
+
+	double error = 0;
+	for(unsigned int i = 0; i < xsects.size(); i++){
+		cout << xsects.at(i) << endl;
+		if(i > 0)
+			error += pow(xsects.at(i)-xsects.at(0),2);
+	}
+	cout << "xsect = " << xsects.at(0) << " +- " << sqrt(error) << endl;
 
 }
 
-void Fit::savePlot(AllSamples samples, Variable variable){
+double Fit::readAndFit(AllSamples samples, Variable variable, TString syst_folder){
 
+	//Put various samples here
 	readHistos(samples, variable);
 
+	double xsect = doFit(samples, variable, syst_folder);
+
+	if(syst_folder == "central"){
 	TH1D* data = samples.single_mu_data->histo;
 	THStack *hs = buildStack(samples, variable);
 
@@ -97,26 +143,38 @@ void Fit::savePlot(AllSamples samples, Variable variable){
 		ratioPlot(data, hs, samples, variable);
 	}
 
-	doFit(samples, variable);
-
 	delete data;
 	delete hs;
+	}
+
+	return xsect;
 }
 
-void Fit::doFit(AllSamples samples, Variable variable){
+double Fit::doFit(AllSamples samples, Variable variable, TString syst_folder){
 
 	//readHistos(samples, variable);
 	//draw the templates used in the fit
-	drawTemplates(samples, variable);
+	drawTemplates(samples, variable, syst_folder);
 
 	TH1D* data = samples.single_mu_data->histo;
 	TH1D* vjets = samples.vjets->histo;
 	TH1D* qcd =   samples.qcd->histo;
 	TH1D* signal = samples.signal->histo;
+	TH1D* ttbar = samples.ttbar->histo;
+	TH1D* single_t = samples.single_t->histo;
+
+	Muon QCDmuon;
+	QCDmuon.setSelection("TTbar_plus_X_analysis/MuPlusJets/QCD non iso mu+jets ge3j");
+	TH1D* qcd_data = QCDmuon.qcdHisto(samples, variable);
+	qcd_data->SetFillColor(samples.qcd->fillColor);
+	qcd_data->Scale(qcd->Integral()/qcd_data->Integral());
 
 	//set the parameters
 	double Ntop_err, Nbg_err, Nqcd_err;
+
 	double Ntop = signal->IntegralAndError(0, signal->GetNbinsX()+1, Ntop_err);
+	double Nttbar = ttbar->Integral();
+	double Nsingle_t = single_t->Integral();
 	double Nbg  = vjets->IntegralAndError(0, signal->GetNbinsX()+1, Nbg_err);
 	double Nqcd = qcd->IntegralAndError(0, signal->GetNbinsX()+1, Nqcd_err);
 	double Ntotal = data->Integral();
@@ -124,14 +182,14 @@ void Fit::doFit(AllSamples samples, Variable variable){
 	TVirtualFitter* fitter = TVirtualFitter::Fitter(0,3);
 	fitter->SetFCN(fcn);
 
-//	Double_t arg(-1); // disable printout
-//	fitter->ExecuteCommand("SET PRINT",&arg,1);
+	Double_t arg(-1); // disable printout
+	fitter->ExecuteCommand("SET PRINT",&arg,1);
 
 	fitter->SetParameter(0,"Ntop", Ntop, Ntop_err,0,Ntotal);
 	fitter->SetParameter(1,"Nbg" , Nbg,  Nbg_err,0,Ntotal);
 	fitter->SetParameter(2,"Nqcd", Nqcd, Nqcd_err,0,Ntotal);
 
-	TH1D* fit_histos[4] = {data, signal, vjets, qcd};
+	TH1D* fit_histos[4] = {data, signal, vjets, qcd_data};
 	TObjArray fithists(0);
 	for(int i =0; i<4; i++){
 		fithists.Add(fit_histos[i]);
@@ -159,12 +217,12 @@ void Fit::doFit(AllSamples samples, Variable variable){
 	  //do the plotting bit
 	  	signal->Scale(results[0]/Ntop);
 		vjets->Scale(results[1]/Nbg);
-		qcd->Scale(results[2]/Nqcd);
+		qcd_data->Scale(results[2]/Nqcd);
 
 		TCanvas *c3 = new TCanvas("Plot","Plot",900, 600);
 
 		  THStack* sum_fit = new THStack("sum fit","stacked histograms"); //used for stack plot
-		  sum_fit->Add(qcd);sum_fit->Add(vjets);sum_fit->Add(signal);
+		  sum_fit->Add(qcd_data);sum_fit->Add(vjets);sum_fit->Add(signal);
 
 		  sum_fit->Draw("hist");
 		  data->Draw("E same");
@@ -181,29 +239,40 @@ void Fit::doFit(AllSamples samples, Variable variable){
 			TText* textPrelim = doPrelim(0.58,0.96);
 			textPrelim->Draw();
 
-		 	c3->SaveAs("Plots/"+folder+"/"+objName+"/"+variable.name+"_fit.pdf");
-		    c3->SaveAs("Plots/"+folder+"/"+objName+"/"+variable.name+"_fit.png");
+		 	c3->SaveAs("Plots/"+folder+"/"+objName+"/"+syst_folder+"/"+variable.name+"_fit.pdf");
+		    c3->SaveAs("Plots/"+folder+"/"+objName+"/"+syst_folder+"/"+variable.name+"_fit.png");
 		    delete c3;
 
+		    double xsect = (results[0]-Nsingle_t)*245.8/Nttbar;
 
-
+//		    cout << "xsect is: " << xsect << endl;
+		    return xsect;
 }
 
 
-void Fit::drawTemplates(AllSamples samples, Variable variable){
+void Fit::drawTemplates(AllSamples samples, Variable variable, TString syst_folder){
 	TH1D* signal = (TH1D*)samples.signal->histo->Clone("signal");
 	TH1D* vjets = (TH1D*)samples.vjets->histo->Clone("vjets");
 	TH1D* qcd = (TH1D*)samples.qcd->histo->Clone("qcd");
 
+	Muon QCDmuon;
+	QCDmuon.setSelection("TTbar_plus_X_analysis/MuPlusJets/QCD non iso mu+jets ge3j");
+	TH1D* qcd_data = QCDmuon.qcdHisto(samples, variable);
+
 	normAndColor(signal, *samples.ttbar);
 	normAndColor(vjets, *samples.vjets);
 	normAndColor(qcd, *samples.qcd);
+	normAndColor(qcd_data, *samples.qcd);
 
 	TCanvas *c1 = new TCanvas("Plot","Plot",900, 600);
 
 	  signal->Draw();
 	  vjets->Draw("same");
-	  qcd->Draw("same");
+
+	  if(Globals::qcdFromData)
+		  qcd_data->Draw("same");
+	  else
+		  qcd->Draw("same");
 
 	  signal->SetAxisRange(variable.minX, variable.maxX);
 	  signal->GetXaxis()->SetTitle(variable.xTitle); signal->GetXaxis()->SetTitleSize(0.05);
@@ -225,8 +294,9 @@ void Fit::drawTemplates(AllSamples samples, Variable variable){
 		TText* textPrelim = doPrelim(0.58,0.96);
 		textPrelim->Draw();
 
-	  c1->SaveAs("Plots/"+folder+"/"+objName+"/"+variable.name+"_templates.pdf");
-	  c1->SaveAs("Plots/"+folder+"/"+objName+"/"+variable.name+"_templates.png");
+	  c1->SaveAs("Plots/"+folder+"/"+objName+"/"+syst_folder+"/"+variable.name+"_templates.pdf");
+	  c1->SaveAs("Plots/"+folder+"/"+objName+"/"+syst_folder+"/"+variable.name+"_templates.png");
+
 	  delete c1;
 	  delete signal;
 	  delete vjets;
@@ -243,16 +313,25 @@ void Fit::normAndColor(TH1D* hist, Sample sample){
 	hist->SetFillColor(kWhite);
 }
 
-TH1D* Fit::readHistogram(Sample sample, Variable variable) {
+TH1D* Fit::readHistogram(Sample sample, Variable variable, bool btag) {
 
 	cout << "plot: " << selection+objName+"/"+variable.name << endl;
+
 
 	TH1D* plot = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_2btags");
 	TH1D* plot2 = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_3btags");
 	TH1D* plot3 = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_4orMoreBtags");
 
+	TH1D* plot4 = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_0btag");
+	TH1D* plot5 = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_1btag");
+
 	plot->Add(plot2);
 	plot->Add(plot3);
+
+	if(btag == false){
+		plot->Add(plot4);
+		plot->Add(plot5);
+	}
 
 	plot->SetFillColor(sample.fillColor);
 	plot->SetLineColor(sample.lineColor);
@@ -261,6 +340,9 @@ TH1D* Fit::readHistogram(Sample sample, Variable variable) {
 		addOverFlow(plot, variable);
 
 	plot->Rebin(variable.rebinFact);
+
+	cout << "bins X: " << sample.name << " - " << plot->GetNbinsX() << endl;
+
 
 	return plot;
 }
@@ -281,14 +363,14 @@ void Fit::addOverFlow(TH1D* overflow, Variable variable){
 
 void Fit::readHistos(AllSamples samples, Variable variable){
 
-	TH1D* data = readHistogram(*samples.single_mu_data, variable);
-	TH1D* ttbar = readHistogram(*samples.ttbar, variable);
-	TH1D* single_t = readHistogram(*samples.single_t, variable);
+	setSelection("TTbar_plus_X_analysis/MuPlusJets/Ref selection/");
+	TH1D* data = readHistogram(*samples.single_mu_data, variable, true);
+	TH1D* vjets = readHistogram(*samples.vjets, variable, true);
+	TH1D* qcd = readHistogram(*samples.qcd, variable, true);
+	TH1D* ttbar = readHistogram(*samples.ttbar, variable, true);
+	TH1D* single_t = readHistogram(*samples.single_t, variable, true);
 	TH1D* signal = (TH1D*) ttbar->Clone("signal");
 	signal->Add(single_t);
-	TH1D* vjets = readHistogram(*samples.vjets, variable);
-	TH1D* qcd = readHistogram(*samples.qcd, variable);
-
 
 	samples.single_mu_data->SetHisto(data);
 	samples.ttbar->SetHisto(ttbar);
@@ -296,6 +378,23 @@ void Fit::readHistos(AllSamples samples, Variable variable){
 	samples.signal->SetHisto(signal);
 	samples.vjets->SetHisto(vjets);
 	samples.qcd->SetHisto(qcd);
+
+	setSelection("TTbar_plus_X_analysis/MuPlusJets/QCD non iso mu+jets ge3j/");
+	TH1D* data_ge4j = readHistogram(*samples.single_mu_data, variable, false);
+	TH1D* ttbar_ge4j = readHistogram(*samples.ttbar, variable, false);
+	TH1D* single_t_ge4j = readHistogram(*samples.single_t, variable, false);
+	TH1D* signal_ge4j = (TH1D*) ttbar_ge4j->Clone("signal");
+	signal_ge4j->Add(single_t_ge4j);
+	TH1D* vjets_ge4j = readHistogram(*samples.vjets, variable, false);
+	TH1D* qcd_ge4j = readHistogram(*samples.qcd, variable, false);
+
+	samples.single_mu_data->SetHistoGe4j(data_ge4j);
+	samples.ttbar->SetHistoGe4j(ttbar_ge4j);
+	samples.single_t->SetHistoGe4j(single_t_ge4j);
+	samples.signal->SetHistoGe4j(signal_ge4j);
+	samples.vjets->SetHistoGe4j(vjets_ge4j);
+	samples.qcd->SetHistoGe4j(qcd_ge4j);
+
 }
 
 THStack* Fit::buildStack(AllSamples samples, Variable variable){

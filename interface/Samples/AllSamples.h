@@ -15,7 +15,7 @@ namespace std {
 
 class AllSamples {
 public:
-	AllSamples();
+	AllSamples(TString systematic, TString eSystematic);
 	virtual ~AllSamples();
 
 	Sample* single_mu_data;

@@ -32,7 +32,7 @@ class Fit{
 public:
 	Fit();
 	virtual ~Fit();
-	void allPlots(AllSamples samples);
+	void allFits();
 	void readHistos(AllSamples samples, Variable variable);
 protected:
 	TString objName;
@@ -42,16 +42,16 @@ protected:
 	TLegend* legend(AllSamples samples);
 	TText* doPrelim(double x_pos,double y_pos);
 	TText* doChan(double x_pos,double y_pos);
-	TH1D* readHistogram(Sample sample, Variable variable);
+	TH1D* readHistogram(Sample sample, Variable variable, bool btag);
 	THStack* buildStack(AllSamples samples, Variable variable);
 	TH1D* allMChisto(AllSamples samples, Variable variable);
 	TH1D* hashErrors(AllSamples samples, Variable variable);
 	void addOverFlow(TH1D* overflow, Variable variable);
 	void standardPlot(TH1D* data, THStack *hs, AllSamples samples, Variable variable);
 	void ratioPlot(TH1D* data, THStack *hs, AllSamples samples, Variable variable);
-	void savePlot(AllSamples samples, Variable variable);
-	void doFit(AllSamples samples, Variable variable);
-	void drawTemplates(AllSamples samples, Variable variable);
+	double readAndFit(AllSamples samples, Variable variable, TString syst_folder);
+	double doFit(AllSamples samples, Variable variable, TString syst_folder);
+	void drawTemplates(AllSamples samples, Variable variable, TString syst_folder);
 	void normAndColor(TH1D* hist, Sample sample);
 //	void fcn(int& npar, double* deriv, double& f, double par[], int flags);
 };

@@ -117,6 +117,19 @@ TH1D* Object::allMChisto(AllSamples samples, Variable variable){
 	return allMC;
 }
 
+TH1D* Object::qcdHisto(AllSamples samples, Variable variable){
+
+	TH1D *data = (TH1D*)samples.single_mu_data->histo_ge4j->Clone("data");
+
+	TH1D *allMC = (TH1D*)samples.ttbar->histo_ge4j->Clone("ratio plot");
+	allMC->Add(samples.vjets->histo_ge4j);
+	allMC->Add(samples.single_t->histo_ge4j);
+
+	data->Add(allMC, -1);
+
+	return data;
+}
+
 void Object::standardPlot(TH1D* data, THStack *hs, AllSamples samples, Variable variable){
 	//Style
 	TdrStyle style;

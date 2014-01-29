@@ -20,22 +20,24 @@ int main() {
 	TH1F* dummy = new TH1F("dummy", "dummy", 10, 0, 1);
 	delete dummy;
 
-	AllSamples samples;
+	AllSamples samples("central", "");
 
-//	MET met;
-//	met.allPlots(samples);
+	MET met;
+	met.allPlots(samples);
 //
 //	Jets jets;
 //	jets.allPlots(samples);
 
 //	Muon muon;
+//	muon.setSelection("TTbar_plus_X_analysis/MuPlusJets/QCD non iso mu+jets ge3j/");
 //	muon.allPlots(samples);
 
-	Fit fit;
-	fit.allPlots(samples);
+//	CutFlow cutflow;
+//	cutflow.allPlots(samples);
 
-	CutFlow cutflow;
-	cutflow.allPlots(samples);
+//	do not do muon plots and fits at the same time as it messes up the eta distn.
+	Fit fit;
+	fit.allFits();
 
 	return 0;
 
