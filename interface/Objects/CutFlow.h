@@ -44,6 +44,7 @@ private:
 	void readCutFlowHistos(AllSamples samples, Variable variable);
 	void saveCutFlowPlot(AllSamples samples, Variable variable);
 	void setBinLabels(THStack* hs, TH1D* data);
+	void cutFlowEffPlots(TH1D* data, AllSamples samples, Variable variable);
 	void standardCutFlowPlot(TH1D* data, THStack *hs, AllSamples samples, Variable variable);
 	void ratioCutFlowPlot(TH1D* data, THStack *hs, AllSamples samples, Variable variable);
 	void writeTable(AllSamples samples, Variable variable);

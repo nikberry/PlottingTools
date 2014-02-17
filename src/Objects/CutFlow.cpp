@@ -43,6 +43,7 @@ void CutFlow::saveCutFlowPlot(AllSamples samples, Variable variable){
 	THStack *hs = buildStack(samples, variable);
 
 	standardCutFlowPlot(data, hs, samples, variable);
+	cutFlowEffPlots(data, samples, variable);
 
 	if(Globals::addRatioPlot){
 		ratioCutFlowPlot(data, hs, samples, variable);
@@ -102,6 +103,99 @@ TH1D* CutFlow::allMChisto(AllSamples samples, Variable variable){
 	allMC->Add(samples.single_t->histo);
 
 	return allMC;
+}
+
+void CutFlow::cutFlowEffPlots(TH1D* data, AllSamples samples, Variable variable) {
+	
+	//Style
+	TdrStyle style;
+	style.setTDRStyle();
+	
+	TH1D* dataEff = new TH1D("data eff","data eff",11,0,11);
+	TH1D* mcEff = new TH1D("mc eff","mc eff",11,0,11);
+	TH1D* ttbarEff = new TH1D("ttbar eff", "ttbar eff", 11, 0, 11);
+	TH1D* vjetsEff = new TH1D("vjets eff", "v+jets eff", 11, 0, 11);
+	TH1D* singletEff = new TH1D("singlet eff", "single top eff", 11, 0, 11);
+	TH1D* qcdEff = new TH1D("qcd eff", "qcd eff", 11, 0, 11);
+	
+	TH1D* allMC = allMChisto(samples, variable);
+	TH1D* ttbar = samples.ttbar->histo;
+	TH1D* vjets = samples.vjets->histo;
+	TH1D* singlet = samples.single_t->histo;
+	TH1D* qcd = samples.qcd->histo;
+
+	mcEff->Sumw2();
+	dataEff->Sumw2();
+	
+	TString step[11] = {"Skim" ,"Cleaning and HLT","one isolated #mu", "loose #mu veto", "loose e veto", "#geq 1 jets", "#geq 2 jets","#geq 3 jets", "#geq 4 jets", "#geq1 CSV b-tag", "#geq2 CSV b-tag" };
+
+	for(int q =1; q<samples.ttbar->histo->GetNbinsX(); q++){
+	mcEff->GetXaxis()->SetBinLabel(q, step[q]);
+	
+	dataEff->SetBinContent(q, data->GetBinContent(q+1)/data->GetBinContent(q));
+	dataEff->SetBinError(q, dataEff->GetBinContent(q)*sqrt(pow(data->GetBinError(q+1)/data->GetBinContent(q+1),2)+pow(data->GetBinError(q)/data->GetBinContent(q),2)));
+	
+	ttbarEff->SetBinContent(q, ttbar->GetBinContent(q+1)/ttbar->GetBinContent(q));
+	ttbarEff->SetBinError(q, ttbarEff->GetBinContent(q)*sqrt(pow(ttbar->GetBinError(q+1)/ttbar->GetBinContent(q+1),2)+pow(ttbar->GetBinError(q)/ttbar->GetBinContent(q),2)));
+	
+	vjetsEff->SetBinContent(q, vjets->GetBinContent(q+1)/vjets->GetBinContent(q));
+	vjetsEff->SetBinError(q, vjetsEff->GetBinContent(q)*sqrt(pow(vjets->GetBinError(q+1)/vjets->GetBinContent(q+1),2)+pow(vjets->GetBinError(q)/vjets->GetBinContent(q),2)));
+	
+	singletEff->SetBinContent(q, singlet->GetBinContent(q+1)/singlet->GetBinContent(q));
+	singletEff->SetBinError(q, singletEff->GetBinContent(q)*sqrt(pow(singlet->GetBinError(q+1)/singlet->GetBinContent(q+1),2)+pow(singlet->GetBinError(q)/singlet->GetBinContent(q),2)));
+	
+	qcdEff->SetBinContent(q, qcd->GetBinContent(q+1)/qcd->GetBinContent(q));
+	qcdEff->SetBinError(q, qcdEff->GetBinContent(q)*sqrt(pow(qcd->GetBinError(q+1)/qcd->GetBinContent(q+1),2)+pow(qcd->GetBinError(q)/qcd->GetBinContent(q),2)));
+	
+	mcEff->SetBinContent(q, allMC->GetBinContent(q+1)/allMC->GetBinContent(q));
+	mcEff->SetBinError(q, mcEff->GetBinContent(q)*sqrt(pow(allMC->GetBinError(q+1)/allMC->GetBinContent(q+1),2)+pow(allMC->GetBinError(q)/allMC->GetBinContent(q),2)));
+	
+	}
+	
+	TText* textChan = doChan(0.12,0.96);
+	textChan->Draw();
+	TText* textPrelim = doPrelim(0.58,0.96);
+	textPrelim->Draw();
+	
+	TCanvas *c3 = new TCanvas("cutflow eff","cutflow eff",600, 500);
+  	
+	mcEff->SetLineColor(kRed);
+	mcEff->Draw();
+	dataEff->Draw("Esame");
+	
+	TLegend *tleg3;
+	tleg3 = new TLegend(0.7,0.7,0.8,0.9);
+	tleg3->SetTextSize(0.04);
+	tleg3->SetBorderSize(0);
+	tleg3->SetFillColor(10);
+	tleg3->AddEntry(dataEff , "data", "l");
+	tleg3->AddEntry(mcEff , "mc", "l");
+	
+	tleg3->Draw("same");
+	
+	c3->SaveAs("Plots/ControlPlots/"+objName+"/"+"cutEff.png");
+	c3->SaveAs("Plots/ControlPlots/"+objName+"/"+"cutEff.pdf");
+	
+	c3->SetLogy();
+	c3->SaveAs("Plots/ControlPlots/"+objName+"/Log/"+"cutEff.png");
+	c3->SaveAs("Plots/ControlPlots/"+objName+"/Log/"+"cutEff.pdf");
+	delete c3;
+	delete textChan;
+	delete textPrelim;
+	
+	cout << " & ttbar & v+jets & single-t & qcd & all MC & data " << endl;
+	
+	for(int q = 0; q < dataEff->GetNbinsX(); q++){
+	
+		cout << step[q+1] << " & " << ttbarEff->GetBinContent(q+1) << " $\\pm$ " << ttbarEff->GetBinError(q+1)  << " & " <<
+			vjetsEff->GetBinContent(q+1) << " $\\pm$ " << vjetsEff->GetBinError(q+1)  << " & " <<
+			singletEff->GetBinContent(q+1) << " $\\pm$ " << singletEff->GetBinError(q+1)  << " & " <<
+			qcdEff->GetBinContent(q+1) << " $\\pm$ " << qcdEff->GetBinError(q+1)  << " & " <<
+			mcEff->GetBinContent(q+1) << " $\\pm$ " << mcEff->GetBinError(q+1)  << " & " <<
+		        dataEff->GetBinContent(q+1) << " $\\pm$ " << dataEff->GetBinError(q+1) << " \\\\ " << endl;
+ 	}
+	
+
 }
 
 void CutFlow::standardCutFlowPlot(TH1D* data, THStack *hs, AllSamples samples, Variable variable){
@@ -271,9 +365,15 @@ void CutFlow::writeTable(AllSamples samples, Variable variable){
     cout << " & ttbar & v+jets & single-t & qcd & all MC & data " << endl;
 
     for(int i = 0; i < samples.ttbar->histo->GetNbinsX(); i++){
-    	cout << step[i] << " & " << samples.ttbar->histo->GetBinContent(i+1) << " $\\pm$ " << samples.ttbar->histo->GetBinError(i+1)  << " & " << samples.vjets->histo->GetBinContent(i+1) << " $\\pm$ " << samples.vjets->histo->GetBinError(i+1)   << " & " << samples.single_t->histo->GetBinContent(i+1) << " $\\pm$ " << samples.single_t->histo->GetBinError(i+1)  << " & " << samples.qcd->histo->GetBinContent(i+1) << " $\\pm$ " << samples.qcd->histo->GetBinError(i+1)  << " & " << allMC->GetBinContent(i+1) << " $\\pm$ " << allMC->GetBinError(i+1)  << " & " << samples.single_mu_data->histo->GetBinContent(i+1) << " $\\pm$ " << samples.single_mu_data->histo->GetBinError(i+1)  << endl;
+    	cout << step[i] << " & " << samples.ttbar->histo->GetBinContent(i+1) << " $\\pm$ " << samples.ttbar->histo->GetBinError(i+1)  << " & " <<
+	samples.vjets->histo->GetBinContent(i+1) << " $\\pm$ " << samples.vjets->histo->GetBinError(i+1)   << " & " << 
+	samples.single_t->histo->GetBinContent(i+1) << " $\\pm$ " << samples.single_t->histo->GetBinError(i+1)  << " & " << 
+	samples.qcd->histo->GetBinContent(i+1) << " $\\pm$ " << samples.qcd->histo->GetBinError(i+1)  << " & " <<
+	allMC->GetBinContent(i+1) << " $\\pm$ " << allMC->GetBinError(i+1)  << " & " <<
+	samples.single_mu_data->histo->GetBinContent(i+1) << " $\\pm$ " << samples.single_mu_data->histo->GetBinError(i+1) << " \\\\ " << endl;
 
     }
+    
 }
 
 TText* CutFlow::doChan(double x_pos,double y_pos){

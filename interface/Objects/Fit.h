@@ -38,6 +38,7 @@ protected:
 	TString objName;
 	TString selection;
 	TString folder;
+	bool abseta, m3, mlb;
 	void setSelection(TString sel_name);
 	TLegend* legend(AllSamples samples);
 	TText* doPrelim(double x_pos,double y_pos);

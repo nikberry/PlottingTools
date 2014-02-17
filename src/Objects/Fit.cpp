@@ -67,9 +67,15 @@ void fcn(int& npar, double* deriv, double& f, double par[], int flag){
 }
 
 Fit::Fit() {
+
 	objName = "Muon";
-	selection = "TTbar_plus_X_analysis/MuPlusJets/Ref selection/";
+ 	selection = "TTbar_plus_X_analysis/MuPlusJets/Ref selection/";
+//	selection = "DiffVariablesAnalyser/MuPlusJets/";
 	folder = "Fits";
+//	abseta = true;
+//	m3 = true;
+	mlb = true;
+	
 }
 
 Fit::~Fit() {
@@ -79,9 +85,13 @@ Fit::~Fit() {
 
 void Fit::allFits(){
 	Variable absEta("muon_AbsEta", "muon |#eta|", 0, 2.6, 10);
+	Variable M3("M3", "M_{3}", 0, 1000, 5);
+	Variable Mlb("invariant_mass_lepton_1bjet", "M_{lb}", 0, 400, 4);
 	//fits only save standard plot if doFit 3rd arg is "central"
 
 	std::vector<double> xsects;
+
+	if(abseta == true){
 	//could perhaps turn this into an iterator over all samples
 	AllSamples samples("central", "");
 	xsects.push_back(readAndFit(samples, absEta, "central"));
@@ -110,11 +120,84 @@ void Fit::allFits(){
 	AllSamples bjetDown("BJet_down", "_minusBJet");
 	xsects.push_back(readAndFit(bjetDown, absEta, "BJet_down"));
 
-//	AllSamples ljetUp("LightJet_up", "_plusLightJet");
-//	xsects.push_back(readAndFit(ljetUp, absEta, "LightJet_up"));
-//
-//	AllSamples ljetDown("LightJet_down", "_minusLightJet");
-//	xsects.push_back(readAndFit(ljetDown, absEta, "LightJet_down"));
+	AllSamples ljetUp("LightJet_up", "_plusLightJet");
+	xsects.push_back(readAndFit(ljetUp, absEta, "LightJet_up"));
+
+	AllSamples ljetDown("LightJet_down", "_minusLightJet");
+	xsects.push_back(readAndFit(ljetDown, absEta, "LightJet_down"));
+	}
+	
+	if(m3 == true){	
+	//could perhaps turn this into an iterator over all samples
+	AllSamples samples("central", "");
+	xsects.push_back(readAndFit(samples, M3, "central"));
+
+	AllSamples jesUp("JES_up", "_plusJES");
+	xsects.push_back(readAndFit(jesUp, M3, "JES_up"));
+
+	AllSamples jesDown("JES_down", "_minusJES");
+	xsects.push_back(readAndFit(jesDown, M3, "JES_down"));
+
+	AllSamples jerUp("JER_up", "_plusJER");
+	xsects.push_back(readAndFit(jerUp, M3, "JER_up"));
+
+	AllSamples jerDown("JER_down", "_minusJER");
+	xsects.push_back(readAndFit(jerDown, M3, "JER_down"));
+
+	AllSamples puUp("PU_up", "_PU_72765mb");
+	xsects.push_back(readAndFit(puUp, M3, "PU_up"));
+
+	AllSamples pudown("PU_down", "_PU_65835mb");
+	xsects.push_back(readAndFit(pudown, M3, "PU_down"));
+
+	AllSamples bjetUp("BJet_up", "_plusBjet");
+	xsects.push_back(readAndFit(bjetUp, M3, "BJet_up"));
+
+	AllSamples bjetDown("BJet_down", "_minusBJet");
+	xsects.push_back(readAndFit(bjetDown, M3, "BJet_down"));
+
+	AllSamples ljetUp("LightJet_up", "_plusLightJet");
+	xsects.push_back(readAndFit(ljetUp, M3, "LightJet_up"));
+
+	AllSamples ljetDown("LightJet_down", "_minusLightJet");
+	xsects.push_back(readAndFit(ljetDown, M3, "LightJet_down"));
+	}
+	
+	if(mlb == true){	
+	//could perhaps turn this into an iterator over all samples
+	AllSamples samples("central", "");
+	xsects.push_back(readAndFit(samples, Mlb, "central"));
+
+	AllSamples jesUp("JES_up", "_plusJES");
+	xsects.push_back(readAndFit(jesUp, Mlb, "JES_up"));
+
+	AllSamples jesDown("JES_down", "_minusJES");
+	xsects.push_back(readAndFit(jesDown, Mlb, "JES_down"));
+
+	AllSamples jerUp("JER_up", "_plusJER");
+	xsects.push_back(readAndFit(jerUp, Mlb, "JER_up"));
+
+	AllSamples jerDown("JER_down", "_minusJER");
+	xsects.push_back(readAndFit(jerDown, Mlb, "JER_down"));
+
+	AllSamples puUp("PU_up", "_PU_72765mb");
+	xsects.push_back(readAndFit(puUp, Mlb, "PU_up"));
+
+	AllSamples pudown("PU_down", "_PU_65835mb");
+	xsects.push_back(readAndFit(pudown, Mlb, "PU_down"));
+
+	AllSamples bjetUp("BJet_up", "_plusBjet");
+	xsects.push_back(readAndFit(bjetUp, Mlb, "BJet_up"));
+
+	AllSamples bjetDown("BJet_down", "_minusBJet");
+	xsects.push_back(readAndFit(bjetDown, Mlb, "BJet_down"));
+
+	AllSamples ljetUp("LightJet_up", "_plusLightJet");
+	xsects.push_back(readAndFit(ljetUp, Mlb, "LightJet_up"));
+
+	AllSamples ljetDown("LightJet_down", "_minusLightJet");
+	xsects.push_back(readAndFit(ljetDown, Mlb, "LightJet_down"));
+	}
 
 	double error = 0;
 	for(unsigned int i = 0; i < xsects.size(); i++){
@@ -168,6 +251,7 @@ double Fit::doFit(AllSamples samples, Variable variable, TString syst_folder){
 	TH1D* qcd_data = QCDmuon.qcdHisto(samples, variable);
 	qcd_data->SetFillColor(samples.qcd->fillColor);
 	qcd_data->Scale(qcd->Integral()/qcd_data->Integral());
+	
 
 	//set the parameters
 	double Ntop_err, Nbg_err, Nqcd_err;
@@ -189,7 +273,7 @@ double Fit::doFit(AllSamples samples, Variable variable, TString syst_folder){
 	fitter->SetParameter(1,"Nbg" , Nbg,  Nbg_err,0,Ntotal);
 	fitter->SetParameter(2,"Nqcd", Nqcd, Nqcd_err,0,Ntotal);
 
-	TH1D* fit_histos[4] = {data, signal, vjets, qcd_data};
+	TH1D* fit_histos[4] = {data, signal, vjets, qcd};//qcd_data
 	TObjArray fithists(0);
 	for(int i =0; i<4; i++){
 		fithists.Add(fit_histos[i]);
@@ -216,30 +300,55 @@ double Fit::doFit(AllSamples samples, Variable variable, TString syst_folder){
 
 	  //do the plotting bit
 	  	signal->Scale(results[0]/Ntop);
-		vjets->Scale(results[1]/Nbg);
-		qcd_data->Scale(results[2]/Nqcd);
-
+		vjets->Scale(results[1]/Nbg);	
+		
+		if(abseta == true)	
+			qcd_data->Scale(results[2]/Nqcd);
+		else 
+			qcd->Scale(results[2]/Nqcd);
+		
+		TH1D* bkgd = (TH1D*) vjets->Clone("vjets");
+		if(Globals::qcdFromData){
+			bkgd->Add(qcd_data);
+		} else
+			bkgd->Add(qcd);
+		
 		TCanvas *c3 = new TCanvas("Plot","Plot",900, 600);
 
 		  THStack* sum_fit = new THStack("sum fit","stacked histograms"); //used for stack plot
-		  sum_fit->Add(qcd_data);sum_fit->Add(vjets);sum_fit->Add(signal);
-
+//		  sum_fit->Add(qcd_data);sum_fit->Add(vjets);sum_fit->Add(signal);
+//		  sum_fit->Add(qcd);sum_fit->Add(vjets);sum_fit->Add(signal);
+//		  sum_fit->Add(vjets);sum_fit->Add(signal);
+		  sum_fit->Add(bkgd); sum_fit->Add(signal);
 		  sum_fit->Draw("hist");
 		  data->Draw("E same");
 
 		  sum_fit->GetXaxis()->SetLimits(variable.minX, variable.maxX);
 		  sum_fit->GetXaxis()->SetTitle(variable.xTitle); sum_fit->GetXaxis()->SetTitleSize(0.05);
 		  sum_fit->GetYaxis()->SetTitle("Number of Events");sum_fit->GetYaxis()->SetTitleSize(0.05);
+//
+//			TLegend* leg = legend(samples);
+//			leg->Draw();
 
-			TLegend* leg = legend(samples);
-			leg->Draw();
+			TLegend *tleg;
+			tleg = new TLegend(0.65,0.7,0.8,0.9);
+			tleg->SetTextSize(0.04);
+			tleg->SetBorderSize(0);
+			tleg->SetFillColor(10);
+
+			tleg->AddEntry(signal , "signal", "f");
+//			tleg->AddEntry(vjets , "v+jets", "f");
+//			tleg->AddEntry(qcd , "QCD", "f");
+//			tleg->AddEntry(qcd_data , "QCD", "f");
+			tleg->AddEntry(bkgd, "bkgd", "f");
+	 		tleg->Draw("same");
 
 		 	TText* textChan = doChan(0.12,0.96);
 			textChan->Draw();
 			TText* textPrelim = doPrelim(0.58,0.96);
 			textPrelim->Draw();
 
-		 	c3->SaveAs("Plots/"+folder+"/"+objName+"/"+syst_folder+"/"+variable.name+"_fit.pdf");
+		    c3->SaveAs("Plots/"+folder+"/"+objName+"/"+syst_folder+"/"+variable.name+"_fit.pdf");
 		    c3->SaveAs("Plots/"+folder+"/"+objName+"/"+syst_folder+"/"+variable.name+"_fit.png");
 		    delete c3;
 
@@ -259,20 +368,28 @@ void Fit::drawTemplates(AllSamples samples, Variable variable, TString syst_fold
 	QCDmuon.setSelection("TTbar_plus_X_analysis/MuPlusJets/QCD non iso mu+jets ge3j");
 	TH1D* qcd_data = QCDmuon.qcdHisto(samples, variable);
 
+	TH1D* bkgd = (TH1D*)vjets->Clone("vjets");
+	if(abseta == true)
+		bkgd->Add(qcd_data);
+	else		
+		bkgd->Add(qcd);
+
 	normAndColor(signal, *samples.ttbar);
 	normAndColor(vjets, *samples.vjets);
 	normAndColor(qcd, *samples.qcd);
 	normAndColor(qcd_data, *samples.qcd);
+	normAndColor(bkgd, *samples.vjets);
 
 	TCanvas *c1 = new TCanvas("Plot","Plot",900, 600);
 
 	  signal->Draw();
-	  vjets->Draw("same");
+	  bkgd->Draw("same");
+//	  vjets->Draw("same");
 
-	  if(Globals::qcdFromData)
-		  qcd_data->Draw("same");
-	  else
-		  qcd->Draw("same");
+// 	  if(abseta == true)
+// 		  qcd_data->Draw("same");
+// 	  else
+// 		  qcd->Draw("same");
 
 	  signal->SetAxisRange(variable.minX, variable.maxX);
 	  signal->GetXaxis()->SetTitle(variable.xTitle); signal->GetXaxis()->SetTitleSize(0.05);
@@ -285,8 +402,10 @@ void Fit::drawTemplates(AllSamples samples, Variable variable, TString syst_fold
 		tleg->SetFillColor(10);
 
 		tleg->AddEntry(signal , "signal", "l");
-		tleg->AddEntry(vjets , "v+jets", "l");
-		tleg->AddEntry(qcd , "QCD", "l");
+//		tleg->AddEntry(vjets , "v+jets", "l");
+//		tleg->AddEntry(qcd , "QCD", "l");
+//		tleg->AddEntry(qcd_data , "QCD", "l");
+		tleg->AddEntry(bkgd, "bkgd", "l");
 	 	tleg->Draw("same");
 
 	 	TText* textChan = doChan(0.12,0.96);
@@ -315,23 +434,31 @@ void Fit::normAndColor(TH1D* hist, Sample sample){
 
 TH1D* Fit::readHistogram(Sample sample, Variable variable, bool btag) {
 
-	cout << "plot: " << selection+objName+"/"+variable.name << endl;
+	if(abseta == true){
+		cout << "plot: " << selection+objName+"/"+variable.name << endl;
+		
+		TH1D* plot = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_2btags");
+		TH1D* plot2 = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_3btags");
+		TH1D* plot3 = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_4orMoreBtags");
 
+		TH1D* plot4 = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_0btag");
+		TH1D* plot5 = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_1btag");
 
-	TH1D* plot = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_2btags");
-	TH1D* plot2 = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_3btags");
-	TH1D* plot3 = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_4orMoreBtags");
-
-	TH1D* plot4 = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_0btag");
-	TH1D* plot5 = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_1btag");
-
-	plot->Add(plot2);
-	plot->Add(plot3);
-
-	if(btag == false){
-		plot->Add(plot4);
-		plot->Add(plot5);
+		plot->Add(plot2);
+		plot->Add(plot3);
+	
+		if(btag == false){
+			plot->Add(plot4);
+			plot->Add(plot5);
+		}
 	}
+
+//	if(m3 == true || mlb == true){
+		cout << "plot: " << selection+variable.name << endl;
+
+		TH1D* plot = (TH1D*) sample.file->Get(selection+variable.name);
+//	}
+
 
 	plot->SetFillColor(sample.fillColor);
 	plot->SetLineColor(sample.lineColor);
@@ -363,37 +490,65 @@ void Fit::addOverFlow(TH1D* overflow, Variable variable){
 
 void Fit::readHistos(AllSamples samples, Variable variable){
 
-	setSelection("TTbar_plus_X_analysis/MuPlusJets/Ref selection/");
-	TH1D* data = readHistogram(*samples.single_mu_data, variable, true);
-	TH1D* vjets = readHistogram(*samples.vjets, variable, true);
-	TH1D* qcd = readHistogram(*samples.qcd, variable, true);
-	TH1D* ttbar = readHistogram(*samples.ttbar, variable, true);
-	TH1D* single_t = readHistogram(*samples.single_t, variable, true);
-	TH1D* signal = (TH1D*) ttbar->Clone("signal");
-	signal->Add(single_t);
 
-	samples.single_mu_data->SetHisto(data);
-	samples.ttbar->SetHisto(ttbar);
-	samples.single_t->SetHisto(single_t);
-	samples.signal->SetHisto(signal);
-	samples.vjets->SetHisto(vjets);
-	samples.qcd->SetHisto(qcd);
+	if(abseta == true){ 
+	
+		setSelection("TTbar_plus_X_analysis/MuPlusJets/Ref selection/");
+		
+		TH1D* data = readHistogram(*samples.single_mu_data, variable, true);
+		TH1D* vjets = readHistogram(*samples.vjets, variable, true);
+		TH1D* qcd = readHistogram(*samples.qcd, variable, true);
+		TH1D* ttbar = readHistogram(*samples.ttbar, variable, true);
+		TH1D* single_t = readHistogram(*samples.single_t, variable, true);
+		TH1D* signal = (TH1D*) ttbar->Clone("signal");
+		signal->Add(single_t);
 
-	setSelection("TTbar_plus_X_analysis/MuPlusJets/QCD non iso mu+jets ge3j/");
-	TH1D* data_ge4j = readHistogram(*samples.single_mu_data, variable, false);
-	TH1D* ttbar_ge4j = readHistogram(*samples.ttbar, variable, false);
-	TH1D* single_t_ge4j = readHistogram(*samples.single_t, variable, false);
-	TH1D* signal_ge4j = (TH1D*) ttbar_ge4j->Clone("signal");
-	signal_ge4j->Add(single_t_ge4j);
-	TH1D* vjets_ge4j = readHistogram(*samples.vjets, variable, false);
-	TH1D* qcd_ge4j = readHistogram(*samples.qcd, variable, false);
+		samples.single_mu_data->SetHisto(data);
+		samples.ttbar->SetHisto(ttbar);
+		samples.single_t->SetHisto(single_t);
+		samples.signal->SetHisto(signal);
+		samples.vjets->SetHisto(vjets);
+		samples.qcd->SetHisto(qcd);
 
-	samples.single_mu_data->SetHistoGe4j(data_ge4j);
-	samples.ttbar->SetHistoGe4j(ttbar_ge4j);
-	samples.single_t->SetHistoGe4j(single_t_ge4j);
-	samples.signal->SetHistoGe4j(signal_ge4j);
-	samples.vjets->SetHistoGe4j(vjets_ge4j);
-	samples.qcd->SetHistoGe4j(qcd_ge4j);
+		setSelection("TTbar_plus_X_analysis/MuPlusJets/QCD non iso mu+jets ge3j/");
+		TH1D* data_ge4j = readHistogram(*samples.single_mu_data, variable, false);
+		TH1D* ttbar_ge4j = readHistogram(*samples.ttbar, variable, false);
+		TH1D* single_t_ge4j = readHistogram(*samples.single_t, variable, false);
+		TH1D* signal_ge4j = (TH1D*) ttbar_ge4j->Clone("signal");
+		signal_ge4j->Add(single_t_ge4j);
+		TH1D* vjets_ge4j = readHistogram(*samples.vjets, variable, false);
+		TH1D* qcd_ge4j = readHistogram(*samples.qcd, variable, false);
+
+		samples.single_mu_data->SetHistoGe4j(data_ge4j);
+		samples.ttbar->SetHistoGe4j(ttbar_ge4j);
+		samples.single_t->SetHistoGe4j(single_t_ge4j);
+		samples.signal->SetHistoGe4j(signal_ge4j);
+		samples.vjets->SetHistoGe4j(vjets_ge4j);
+		samples.qcd->SetHistoGe4j(qcd_ge4j);
+		
+	} 
+	
+	if(m3 == true || mlb == true){
+	
+		setSelection("DiffVariablesAnalyser/MuPlusJets/");
+		
+		TH1D* data = readHistogram(*samples.single_mu_data, variable, false);
+		TH1D* vjets = readHistogram(*samples.vjets, variable, false);
+		TH1D* qcd = readHistogram(*samples.qcd, variable, false);
+		TH1D* ttbar = readHistogram(*samples.ttbar, variable, false);
+		TH1D* single_t = readHistogram(*samples.single_t, variable, false);
+		TH1D* signal = (TH1D*) ttbar->Clone("signal");
+		signal->Add(single_t);
+		
+		samples.single_mu_data->SetHisto(data);
+		samples.ttbar->SetHisto(ttbar);
+		samples.single_t->SetHisto(single_t);
+		samples.signal->SetHisto(signal);
+		samples.vjets->SetHisto(vjets);
+		samples.qcd->SetHisto(qcd);
+	
+	}
+	
 
 }
 
