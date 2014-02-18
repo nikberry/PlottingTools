@@ -69,8 +69,8 @@ void fcn(int& npar, double* deriv, double& f, double par[], int flag){
 Fit::Fit() {
 
 	objName = "Muon";
- 	selection = "TTbar_plus_X_analysis/MuPlusJets/Ref selection/";
-//	selection = "DiffVariablesAnalyser/MuPlusJets/";
+// 	selection = "TTbar_plus_X_analysis/MuPlusJets/Ref selection/";
+	selection = "DiffVariablesAnalyser/MuPlusJets/";
 	folder = "Fits";
 //	abseta = true;
 //	m3 = true;
@@ -193,21 +193,31 @@ void Fit::allFits(){
 	xsects.push_back(readAndFit(bjetDown, Mlb, "BJet_down"));
 
 	AllSamples ljetUp("LightJet_up", "_plusLightJet");
-	xsects.push_back(readAndFit(ljetUp, Mlb, "LightJet_up"));
+	xsects.push_back(readAndFit(ljetUp, Mlb, "LightJet_up"));	
 
 	AllSamples ljetDown("LightJet_down", "_minusLightJet");
 	xsects.push_back(readAndFit(ljetDown, Mlb, "LightJet_down"));
+	
 	}
 
+	TString syst[11] = {"central", "JES up", "JES down", "JER up", "JER down", "PU up", "PU down", "BJet up", "BJet down", "LightJet up", "LightJet down"};
+	cout << "Syst. & \\sigma & syst.uncrt (\\%)  \\\\" << endl;
 	double error = 0;
 	for(unsigned int i = 0; i < xsects.size(); i++){
-		cout << xsects.at(i) << endl;
+		//cout << xsects.at(i) << endl;
+	
 		if(i > 0)
 			error += pow(xsects.at(i)-xsects.at(0),2);
+			
+			cout << syst[i] << " & " << xsects.at(i) << " & " << ((xsects.at(i) - xsects.at(0))/xsects.at(0))*100 << " \\\\" << endl;
+		
 	}
 	cout << "xsect = " << xsects.at(0) << " +- " << sqrt(error) << endl;
 
+	
+
 }
+
 
 double Fit::readAndFit(AllSamples samples, Variable variable, TString syst_folder){
 
@@ -434,24 +444,24 @@ void Fit::normAndColor(TH1D* hist, Sample sample){
 
 TH1D* Fit::readHistogram(Sample sample, Variable variable, bool btag) {
 
-	if(abseta == true){
-		cout << "plot: " << selection+objName+"/"+variable.name << endl;
-		
-		TH1D* plot = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_2btags");
-		TH1D* plot2 = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_3btags");
-		TH1D* plot3 = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_4orMoreBtags");
-
-		TH1D* plot4 = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_0btag");
-		TH1D* plot5 = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_1btag");
-
-		plot->Add(plot2);
-		plot->Add(plot3);
-	
-		if(btag == false){
-			plot->Add(plot4);
-			plot->Add(plot5);
-		}
-	}
+// 	if(abseta == true){
+// 		cout << "plot: " << selection+objName+"/"+variable.name << endl;
+// 		
+// 		TH1D* plot = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_2btags");
+// 		TH1D* plot2 = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_3btags");
+// 		TH1D* plot3 = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_4orMoreBtags");
+// 
+// 		TH1D* plot4 = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_0btag");
+// 		TH1D* plot5 = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_1btag");
+// 
+// 		plot->Add(plot2);
+// 		plot->Add(plot3);
+// 	
+// 		if(btag == false){
+// 			plot->Add(plot4);
+// 			plot->Add(plot5);
+// 		}
+//	}
 
 //	if(m3 == true || mlb == true){
 		cout << "plot: " << selection+variable.name << endl;

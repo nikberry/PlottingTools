@@ -22,8 +22,8 @@ int main() {
 
 	AllSamples samples("central", "");
 
-//	MET met;
-//	met.allPlots(samples);
+	MET met;
+	met.allPlots(samples);
 
 //	Jets jets;
 //	jets.allPlots(samples);

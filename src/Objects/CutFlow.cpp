@@ -187,12 +187,12 @@ void CutFlow::cutFlowEffPlots(TH1D* data, AllSamples samples, Variable variable)
 	
 	for(int q = 0; q < dataEff->GetNbinsX(); q++){
 	
-		cout << step[q+1] << " & " << ttbarEff->GetBinContent(q+1) << " $\\pm$ " << ttbarEff->GetBinError(q+1)  << " & " <<
-			vjetsEff->GetBinContent(q+1) << " $\\pm$ " << vjetsEff->GetBinError(q+1)  << " & " <<
-			singletEff->GetBinContent(q+1) << " $\\pm$ " << singletEff->GetBinError(q+1)  << " & " <<
-			qcdEff->GetBinContent(q+1) << " $\\pm$ " << qcdEff->GetBinError(q+1)  << " & " <<
-			mcEff->GetBinContent(q+1) << " $\\pm$ " << mcEff->GetBinError(q+1)  << " & " <<
-		        dataEff->GetBinContent(q+1) << " $\\pm$ " << dataEff->GetBinError(q+1) << " \\\\ " << endl;
+		cout << step[q+1] << " & " << ttbarEff->GetBinContent(q+1)*100 << " $\\pm$ " << ttbarEff->GetBinError(q+1)*100  << " & " <<
+			vjetsEff->GetBinContent(q+1)*100 << " $\\pm$ " << vjetsEff->GetBinError(q+1)*100  << " & " <<
+			singletEff->GetBinContent(q+1)*100 << " $\\pm$ " << singletEff->GetBinError(q+1)*100  << " & " <<
+			qcdEff->GetBinContent(q+1)*100 << " $\\pm$ " << qcdEff->GetBinError(q+1)*100  << " & " <<
+			mcEff->GetBinContent(q+1)*100 << " $\\pm$ " << mcEff->GetBinError(q+1)*100  << " & " <<
+		        dataEff->GetBinContent(q+1)*100 << " $\\pm$ " << dataEff->GetBinError(q+1)*100 << " \\\\ " << endl;
  	}
 	
 
