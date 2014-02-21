@@ -2,7 +2,7 @@
  * Fit.cpp
  *
  *  Created on: Dec 24, 2013
- *      Author: philip
+ *      Author: philip/Nik
  */
 
 #include "../../interface/Objects/Fit.h"
@@ -27,7 +27,7 @@ void fcn(int& npar, double* deriv, double& f, double par[], int flag){
 
 		double lnL = 0.0;
 
-		TH1D* data = static_cast<TH1D*>(fithistos->At(0));
+	    	TH1D* data = static_cast<TH1D*>(fithistos->At(0));
 	    TH1D* top_fit = static_cast<TH1D*>(fithistos->At(1));
 	    TH1D* bg_fit = static_cast<TH1D*>(fithistos->At(2));
 	    TH1D* qcd_fit = static_cast<TH1D*>(fithistos->At(3));
@@ -61,20 +61,20 @@ void fcn(int& npar, double* deriv, double& f, double par[], int flag){
 //	cout << "nvjets: " << Nvjets << " ,par1: " << par[1] << endl;
 //	cout << "nqcd: " << Nqcd << " ,par2: " << par[2] << endl;
 
-	  f += ((par[2]-Nqcd)*(par[2]-Nqcd))/(nqcd_err*nqcd_err);
-	  f += ((par[1]-Nvjets)*(par[1]-Nvjets))/(nvjets_err*nvjets_err);
+//	  f += ((par[2]-Nqcd)*(par[2]-Nqcd))/(nqcd_err*nqcd_err);
+//	  f += ((par[1]-Nvjets)*(par[1]-Nvjets))/(nvjets_err*nvjets_err);
 
 }
 
 Fit::Fit() {
 
 	objName = "Muon";
-// 	selection = "TTbar_plus_X_analysis/MuPlusJets/Ref selection/";
-	selection = "DiffVariablesAnalyser/MuPlusJets/";
+ 	selection = "TTbar_plus_X_analysis/MuPlusJets/Ref selection/";
+//	selection = "DiffVariablesAnalyser/MuPlusJets/";
 	folder = "Fits";
-//	abseta = true;
+	abseta = true;
 //	m3 = true;
-	mlb = true;
+//	mlb = true;
 	
 }
 
@@ -153,8 +153,8 @@ void Fit::allFits(){
 	AllSamples bjetUp("BJet_up", "_plusBjet");
 	xsects.push_back(readAndFit(bjetUp, M3, "BJet_up"));
 
-	AllSamples bjetDown("BJet_down", "_minusBJet");
-	xsects.push_back(readAndFit(bjetDown, M3, "BJet_down"));
+ 	AllSamples bjetDown("BJet_down", "_minusBJet");
+ 	xsects.push_back(readAndFit(bjetDown, M3, "BJet_down"));
 
 	AllSamples ljetUp("LightJet_up", "_plusLightJet");
 	xsects.push_back(readAndFit(ljetUp, M3, "LightJet_up"));
@@ -202,18 +202,24 @@ void Fit::allFits(){
 
 	TString syst[11] = {"central", "JES up", "JES down", "JER up", "JER down", "PU up", "PU down", "BJet up", "BJet down", "LightJet up", "LightJet down"};
 	cout << "Syst. & \\sigma & syst.uncrt (\\%)  \\\\" << endl;
-	double error = 0;
+//	double error = 0;
+	double errorUp = 0;
+	double errorDown = 0;
 	for(unsigned int i = 0; i < xsects.size(); i++){
 		//cout << xsects.at(i) << endl;
 	
-		if(i > 0)
-			error += pow(xsects.at(i)-xsects.at(0),2);
+
+			errorUp = pow(xsects.at(1)-xsects.at(0),2) + pow(xsects.at(3)-xsects.at(0),2) + pow(xsects.at(5)-xsects.at(0),2) + pow(xsects.at(7)-xsects.at(0),2) +
+			pow(xsects.at(9)-xsects.at(0),2);
+			errorDown = pow(xsects.at(2)-xsects.at(0),2) + pow(xsects.at(4)-xsects.at(0),2) + pow(xsects.at(6)-xsects.at(0),2) + pow(xsects.at(8)-xsects.at(0),2)
+			+ pow(xsects.at(10)-xsects.at(0),2);
+			
+			//error += pow(xsects.at(i)-xsects.at(0),2);
 			
 			cout << syst[i] << " & " << xsects.at(i) << " & " << ((xsects.at(i) - xsects.at(0))/xsects.at(0))*100 << " \\\\" << endl;
 		
 	}
-	cout << "xsect = " << xsects.at(0) << " +- " << sqrt(error) << endl;
-
+	cout << "xsect = " << xsects.at(0) << " & \\pm" << (sqrt(errorUp)+sqrt(errorDown))/2 << endl;
 	
 
 }
@@ -225,7 +231,7 @@ double Fit::readAndFit(AllSamples samples, Variable variable, TString syst_folde
 	readHistos(samples, variable);
 
 	double xsect = doFit(samples, variable, syst_folder);
-
+	
 	if(syst_folder == "central"){
 	TH1D* data = samples.single_mu_data->histo;
 	THStack *hs = buildStack(samples, variable);
@@ -248,6 +254,7 @@ double Fit::doFit(AllSamples samples, Variable variable, TString syst_folder){
 	//readHistos(samples, variable);
 	//draw the templates used in the fit
 	drawTemplates(samples, variable, syst_folder);
+
 
 	TH1D* data = samples.single_mu_data->histo;
 	TH1D* vjets = samples.vjets->histo;
@@ -370,6 +377,7 @@ double Fit::doFit(AllSamples samples, Variable variable, TString syst_folder){
 
 
 void Fit::drawTemplates(AllSamples samples, Variable variable, TString syst_folder){
+
 	TH1D* signal = (TH1D*)samples.signal->histo->Clone("signal");
 	TH1D* vjets = (TH1D*)samples.vjets->histo->Clone("vjets");
 	TH1D* qcd = (TH1D*)samples.qcd->histo->Clone("qcd");
@@ -377,6 +385,7 @@ void Fit::drawTemplates(AllSamples samples, Variable variable, TString syst_fold
 	Muon QCDmuon;
 	QCDmuon.setSelection("TTbar_plus_X_analysis/MuPlusJets/QCD non iso mu+jets ge3j");
 	TH1D* qcd_data = QCDmuon.qcdHisto(samples, variable);
+	qcd_data->Scale(qcd->Integral()/qcd_data->Integral());
 
 	TH1D* bkgd = (TH1D*)vjets->Clone("vjets");
 	if(abseta == true)
@@ -445,28 +454,28 @@ void Fit::normAndColor(TH1D* hist, Sample sample){
 TH1D* Fit::readHistogram(Sample sample, Variable variable, bool btag) {
 
 // 	if(abseta == true){
-// 		cout << "plot: " << selection+objName+"/"+variable.name << endl;
-// 		
-// 		TH1D* plot = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_2btags");
-// 		TH1D* plot2 = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_3btags");
-// 		TH1D* plot3 = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_4orMoreBtags");
-// 
-// 		TH1D* plot4 = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_0btag");
-// 		TH1D* plot5 = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_1btag");
-// 
-// 		plot->Add(plot2);
-// 		plot->Add(plot3);
-// 	
-// 		if(btag == false){
-// 			plot->Add(plot4);
-// 			plot->Add(plot5);
-// 		}
+		cout << "plot: " << selection+objName+"/"+variable.name << endl;
+		
+		TH1D* plot = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_2btags");
+		TH1D* plot2 = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_3btags");
+		TH1D* plot3 = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_4orMoreBtags");
+
+		TH1D* plot4 = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_0btag");
+		TH1D* plot5 = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_1btag");
+
+		plot->Add(plot2);
+		plot->Add(plot3);
+	
+		if(btag == false){
+			plot->Add(plot4);
+			plot->Add(plot5);
+		}
 //	}
 
 //	if(m3 == true || mlb == true){
-		cout << "plot: " << selection+variable.name << endl;
+//		cout << "plot: " << selection+variable.name << endl;
 
-		TH1D* plot = (TH1D*) sample.file->Get(selection+variable.name);
+//		TH1D* plot = (TH1D*) sample.file->Get(selection+variable.name);
 //	}
 
 
@@ -501,7 +510,7 @@ void Fit::addOverFlow(TH1D* overflow, Variable variable){
 void Fit::readHistos(AllSamples samples, Variable variable){
 
 
-	if(abseta == true){ 
+	if(variable.name == "muon_AbsEta"){ 
 	
 		setSelection("TTbar_plus_X_analysis/MuPlusJets/Ref selection/");
 		
@@ -538,7 +547,7 @@ void Fit::readHistos(AllSamples samples, Variable variable){
 		
 	} 
 	
-	if(m3 == true || mlb == true){
+	if(variable.name == "M3" || variable.name == "invariant_mass_lepton_1bjet"){
 	
 		setSelection("DiffVariablesAnalyser/MuPlusJets/");
 		
