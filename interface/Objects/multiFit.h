@@ -28,10 +28,10 @@
 
 namespace std {
 
-class Fit{
+class multiFit{
 public:
-	Fit();
-	virtual ~Fit();
+	multiFit();
+	virtual ~multiFit();
 	void allFits();
 	void readHistos(AllSamples samples, Variable variable);
 protected:
@@ -44,6 +44,7 @@ protected:
 	TText* doPrelim(double x_pos,double y_pos);
 	TText* doChan(double x_pos,double y_pos);
 	TH1D* readHistogram(Sample sample, Variable variable, bool btag);
+	TH1D* readHistogram2(Sample sample, Variable variable, bool btag);
 	THStack* buildStack(AllSamples samples, Variable variable);
 	TH1D* allMChisto(AllSamples samples, Variable variable);
 	TH1D* hashErrors(AllSamples samples, Variable variable);

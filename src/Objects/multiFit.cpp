@@ -1,11 +1,11 @@
 /*
- * Fit.cpp
+ * multiFit.cpp
  *
  *  Created on: Dec 24, 2013
  *      Author: philip/Nik
  */
 
-#include "../../interface/Objects/Fit.h"
+#include "../../interface/Objects/multiFit.h"
 #include "TCanvas.h"
 #include "TPad.h"
 #include "TLatex.h"
@@ -66,278 +66,96 @@ void fcn(int& npar, double* deriv, double& f, double par[], int flag){
 
 }
 
-Fit::Fit() {
-
+multiFit::multiFit(){
+	
 	objName = "Muon";
- 	selection = "TTbar_plus_X_analysis/MuPlusJets/Ref selection/";
-//	selection = "DiffVariablesAnalyser/MuPlusJets/";
-	folder = "Fits";
-	abseta = true;
-//	m3 = true;
-//	mlb = true;
-	
-}
+//        selection = "TTbar_plus_X_analysis/MuPlusJets/Ref selection/";
+//      selection = "DiffVariablesAnalyser/MuPlusJets/";
+        folder = "Fits";
+ //       abseta = true;
+//      m3 = true;
+ //     mlb = true;
 
-Fit::~Fit() {
+
 
 }
 
-void Fit::allFits(){
+multiFit::~multiFit(){
+}
+
+void multiFit::allFits(){
+
+
 	Variable absEta("muon_AbsEta", "muon |#eta|", 0, 2.6, 10);
 	Variable M3("M3", "M_{3}", 0, 1000, 5);
 	Variable Mlb("invariant_mass_lepton_1bjet", "M_{lb}", 0, 400, 4);
+	
 	//fits only save standard plot if doFit 3rd arg is "central"
 
-	vector<double> xsectsAbsEta;
-	vector<double> xsectsM3;
-	vector<double> xsectsMlb;
-	vector<double> xsects;
-
-	AllSamples samples("central", "");
-	AllSamples jesUp("JES_up", "_plusJES");
-	AllSamples jesDown("JES_down", "_minusJES");
-	AllSamples jerUp("JER_up", "_plusJER");
-	AllSamples jerDown("JER_down", "_minusJER");
-	AllSamples puUp("PU_up", "_PU_72765mb");
-	AllSamples pudown("PU_down", "_PU_65835mb");
-	AllSamples bjetUp("BJet_up", "_plusBjet");
-	AllSamples bjetDown("BJet_down", "_minusBJet");
-	AllSamples ljetUp("LightJet_up", "_plusLightJet");
-	AllSamples ljetDown("LightJet_down", "_minusLightJet");
-
-	if(abseta == true){
-	xsectsAbsEta.push_back(readAndFit(samples, absEta, "central"));
-	xsectsAbsEta.push_back(readAndFit(jesUp, absEta, "JES_up"));
-	xsectsAbsEta.push_back(readAndFit(jesDown, absEta, "JES_down"));
-	xsectsAbsEta.push_back(readAndFit(jerUp, absEta, "JER_up"));
-	xsectsAbsEta.push_back(readAndFit(jerDown, absEta, "JER_down"));
-	xsectsAbsEta.push_back(readAndFit(puUp, absEta, "PU_up"));
-	xsectsAbsEta.push_back(readAndFit(pudown, absEta, "PU_down"));
-	xsectsAbsEta.push_back(readAndFit(bjetUp, absEta, "BJet_up"));
-	xsectsAbsEta.push_back(readAndFit(bjetDown, absEta, "BJet_down"));
-	xsectsAbsEta.push_back(readAndFit(ljetUp, absEta, "LightJet_up"));
-	xsectsAbsEta.push_back(readAndFit(ljetDown, absEta, "LightJet_down"));
-	}
+	vector<xSects> xSectVector;
+	vector<AllSamples> sampVect;
 	
-	if(m3 == true){	
-	xsectsM3.push_back(readAndFit(samples, M3, "central"));
-	xsectsM3.push_back(readAndFit(jesUp, M3, "JES_up"));
-	xsectsM3.push_back(readAndFit(jesDown, M3, "JES_down"));
-	xsectsM3.push_back(readAndFit(jerUp, M3, "JER_up"));
-	xsectsM3.push_back(readAndFit(jerDown, M3, "JER_down"));
-	xsectsM3.push_back(readAndFit(puUp, M3, "PU_up"));
-	xsectsM3.push_back(readAndFit(pudown, M3, "PU_down"));
-	xsectsM3.push_back(readAndFit(bjetUp, M3, "BJet_up"));
- 	xsectsM3.push_back(readAndFit(bjetDown, M3, "BJet_down"));
-	xsectsM3.push_back(readAndFit(ljetUp, M3, "LightJet_up"));
-	xsectsM3.push_back(readAndFit(ljetDown, M3, "LightJet_down"));
-	}
+	sampVect.push_back(AllSamples("central", ""));
+	sampVect.push_back(AllSamples("JES_up", "_plusJES"));
+	sampVect.push_back(AllSamples("JES_down", "_minusJES"));
+	sampVect.push_back(AllSamples("JER_up", "_plusJER"));
+	sampVect.push_back(AllSamples("JER_down", "_minusJER"));
+	sampVect.push_back(AllSamples("PU_up", "_PU_72765mb"));
+	sampVect.push_back(AllSamples("PU_down", "_PU_65835mb"));
+	sampVect.push_back(AllSamples("BJet_up", "_plusBjet"));
+	sampVect.push_back(AllSamples("BJet_down", "_minusBJet"));
+	sampVect.push_back(AllSamples("LightJet_up", "_plusLightJet"));
+	sampVect.push_back(AllSamples("LightJet_down", "_minusLightJet"));
 	
-	if(mlb == true){	
-	xsectsMlb.push_back(readAndFit(samples, Mlb, "central"));
-	xsectsMlb.push_back(readAndFit(jesUp, Mlb, "JES_up"));
-	xsectsMlb.push_back(readAndFit(jesDown, Mlb, "JES_down"));
-	xsectsMlb.push_back(readAndFit(jerUp, Mlb, "JER_up"));
-	xsectsMlb.push_back(readAndFit(jerDown, Mlb, "JER_down"));
-	xsectsMlb.push_back(readAndFit(puUp, Mlb, "PU_up"));
-	xsectsMlb.push_back(readAndFit(pudown, Mlb, "PU_down"));
-	xsectsMlb.push_back(readAndFit(bjetUp, Mlb, "BJet_up"));
-	xsectsMlb.push_back(readAndFit(bjetDown, Mlb, "BJet_down"));
-	xsectsMlb.push_back(readAndFit(ljetUp, Mlb, "LightJet_up"));	
-	xsectsMlb.push_back(readAndFit(ljetDown, Mlb, "LightJet_down"));
+	TString syst[11] = {"central", "JES_up", "JES_down", "JER_up", "JER_down", "PU_up", "PU_down", "BJet_up", "BJet_down", "LightJet_up", "LightJet_down"};
+	TString syst2[11] = {"central", "JES up", "JES down", "JER up", "JER down", "PU up", "PU down", "BJet up", "BJet down", "LightJet up", "LightJet down"};
+
+	for(unsigned int i = 0; i<11; i++){
+		xSectVector.push_back(xSects(readAndFit(sampVect[i], absEta, syst[i]), readAndFit(sampVect[i], M3, syst[i]),
+		readAndFit(sampVect[i], Mlb, syst[i])));
+		cout <<  syst2[i] << ": " << xSectVector[i].getAbsEta() << "& " << xSectVector[i].getM3() << "& " << xSectVector[i].getMlb() << "\\\\" << endl;
 	}
 
-	TString syst[11] = {"central", "JES up", "JES down", "JER up", "JER down", "PU up", "PU down", "BJet up", "BJet down", "LightJet up", "LightJet down"};
+	
+ 			double errorUpAbsEta = pow(xSectVector[1].getAbsEta()-xSectVector[0].getAbsEta(),2) + pow(xSectVector[3].getAbsEta()-xSectVector[0].getAbsEta(),2) +
+				pow(xSectVector[5].getAbsEta()-xSectVector[0].getAbsEta(),2) + pow(xSectVector[7].getAbsEta()-xSectVector[0].getAbsEta(),2) +
+ 				pow(xSectVector[9].getAbsEta()-xSectVector[0].getAbsEta(),2);
+ 			double errorDownAbsEta = pow(xSectVector[2].getAbsEta()-xSectVector[0].getAbsEta(),2) + pow(xSectVector[4].getAbsEta()-xSectVector[0].getAbsEta(),2) + 
+				pow(xSectVector[6].getAbsEta()-xSectVector[0].getAbsEta(),2) + pow(xSectVector[8].getAbsEta()-xSectVector[0].getAbsEta(),2)
+ 				+ pow(xSectVector[10].getAbsEta()-xSectVector[0].getAbsEta(),2);
+				
+			 
+			double errorUpM3 = pow(xSectVector[1].getM3()-xSectVector[0].getM3(),2) + pow(xSectVector[3].getM3()-xSectVector[0].getM3(),2) +
+				pow(xSectVector[5].getM3()-xSectVector[0].getM3(),2) + pow(xSectVector[7].getM3()-xSectVector[0].getM3(),2) +
+ 				pow(xSectVector[9].getM3()-xSectVector[0].getM3(),2);
+ 			double errorDownM3 = pow(xSectVector[2].getM3()-xSectVector[0].getM3(),2) + pow(xSectVector[4].getM3()-xSectVector[0].getM3(),2) + 
+				pow(xSectVector[6].getM3()-xSectVector[0].getM3(),2) + pow(xSectVector[8].getM3()-xSectVector[0].getM3(),2)
+ 				+ pow(xSectVector[10].getM3()-xSectVector[0].getM3(),2);
+				
+				
+			double errorUpMlb = pow(xSectVector[1].getMlb()-xSectVector[0].getMlb(),2) + pow(xSectVector[3].getMlb()-xSectVector[0].getMlb(),2) +
+				pow(xSectVector[5].getMlb()-xSectVector[0].getMlb(),2) + pow(xSectVector[7].getMlb()-xSectVector[0].getMlb(),2) +
+ 				pow(xSectVector[9].getMlb()-xSectVector[0].getMlb(),2);
+ 			double errorDownMlb = pow(xSectVector[2].getMlb()-xSectVector[0].getMlb(),2) + pow(xSectVector[4].getMlb()-xSectVector[0].getMlb(),2) + 
+				pow(xSectVector[6].getMlb()-xSectVector[0].getMlb(),2) + pow(xSectVector[8].getMlb()-xSectVector[0].getMlb(),2)
+ 				+ pow(xSectVector[10].getMlb()-xSectVector[0].getMlb(),2);
+
 	cout << "Syst. & \\sigma & syst.uncrt (\\%)  \\\\" << endl;
-//	double error = 0;
-	double errorUp = 0;
-	double errorDown = 0;
-	for(unsigned int i = 0; i < xsects.size(); i++){
-		//cout << xsects.at(i) << endl;
-	
-	
-			if(abseta == true){
-				errorUp = pow(xsectsAbsEta.at(1)-xsectsAbsEta.at(0),2) + pow(xsectsAbsEta.at(3)-xsectsAbsEta.at(0),2) + pow(xsectsAbsEta.at(5)-xsectsAbsEta.at(0),2) + pow(xsectsAbsEta.at(7)-xsectsAbsEta.at(0),2) +
-				pow(xsectsAbsEta.at(9)-xsectsAbsEta.at(0),2);
-				errorDown = pow(xsectsAbsEta.at(2)-xsectsAbsEta.at(0),2) + pow(xsectsAbsEta.at(4)-xsectsAbsEta.at(0),2) + pow(xsectsAbsEta.at(6)-xsectsAbsEta.at(0),2) + pow(xsectsAbsEta.at(8)-xsectsAbsEta.at(0),2)
-				+ pow(xsectsAbsEta.at(10)-xsectsAbsEta.at(0),2);
-			} 
-			
-			if(m3 == true){
-				errorUp = pow(xsectsM3.at(1)-xsectsM3.at(0),2) + pow(xsectsM3.at(3)-xsectsM3.at(0),2) + pow(xsectsM3.at(5)-xsectsM3.at(0),2) + pow(xsectsM3.at(7)-xsectsM3.at(0),2) +
-				pow(xsectsM3.at(9)-xsectsM3.at(0),2);
-				errorDown = pow(xsectsM3.at(2)-xsectsM3.at(0),2) + pow(xsectsM3.at(4)-xsectsM3.at(0),2) + pow(xsectsM3.at(6)-xsectsM3.at(0),2) + pow(xsectsM3.at(8)-xsectsM3.at(0),2)
-				+ pow(xsectsM3.at(10)-xsectsM3.at(0),2);
-			} 
-			
-			if(mlb == true) {
-				errorUp = pow(xsectsMlb.at(1)-xsectsMlb.at(0),2) + pow(xsectsMlb.at(3)-xsectsMlb.at(0),2) + pow(xsectsMlb.at(5)-xsectsMlb.at(0),2) + pow(xsectsMlb.at(7)-xsectsMlb.at(0),2) +
-				pow(xsectsMlb.at(9)-xsectsMlb.at(0),2);
-				errorDown = pow(xsectsMlb.at(2)-xsectsMlb.at(0),2) + pow(xsectsMlb.at(4)-xsectsMlb.at(0),2) + pow(xsectsMlb.at(6)-xsectsMlb.at(0),2) + pow(xsectsMlb.at(8)-xsectsMlb.at(0),2)
-				+ pow(xsectsMlb.at(10)-xsectsMlb.at(0),2);
-			}
-			
-			cout << syst[i] << " & " << xsectsAbsEta.at(i) << " & " << ((xsectsAbsEta.at(i) - xsectsAbsEta.at(0))/xsectsAbsEta.at(0))*100 << " \\\\" << endl;
-			cout << syst[i] << " & " << xsectsM3.at(i) << " & " << ((xsectsM3.at(i) - xsectsM3.at(0))/xsectsM3.at(0))*100 << " \\\\" << endl;
-			cout << syst[i] << " & " << xsectsMlb.at(i) << " & " << ((xsectsMlb.at(i) - xsectsMlb.at(0))/xsectsMlb.at(0))*100 << " \\\\" << endl;
-		
-	}
-	
-	cout << "xsect = " << xsectsAbsEta.at(0) << " & \\pm" << (sqrt(errorUp)+sqrt(errorDown))/2 << endl;
-	cout << "xsect = " << xsectsM3.at(0) << " & \\pm" << (sqrt(errorUp)+sqrt(errorDown))/2 << endl;
-	cout << "xsect = " << xsectsMlb.at(0) << " & \\pm" << (sqrt(errorUp)+sqrt(errorDown))/2 << endl;
+ 	
+	cout << "sigma(abseta) = " << xSectVector[0].getAbsEta() << " & \\pm" << (sqrt(errorUpAbsEta)+sqrt(errorDownAbsEta))/2 << endl;
+	cout << "sigma(m3) = " << xSectVector[0].getM3() << " & \\pm" << (sqrt(errorUpM3)+sqrt(errorDownM3))/2 << endl;
+	cout << "sigma(mlb) = " << xSectVector[0].getMlb() << " & \\pm" << (sqrt(errorUpMlb)+sqrt(errorDownMlb))/2 << endl;
 	
 
 }
 
-void Fit::allFits(){
-	Variable absEta("muon_AbsEta", "muon |#eta|", 0, 2.6, 10);
-	Variable M3("M3", "M_{3}", 0, 1000, 5);
-	Variable Mlb("invariant_mass_lepton_1bjet", "M_{lb}", 0, 400, 4);
-	//fits only save standard plot if doFit 3rd arg is "central"
-
-	std::vector<double> xsects;
-
-	if(abseta == true){
-	//could perhaps turn this into an iterator over all samples
-	AllSamples samples("central", "");
-	xsects.push_back(readAndFit(samples, absEta, "central"));
-
-	AllSamples jesUp("JES_up", "_plusJES");
-	xsects.push_back(readAndFit(jesUp, absEta, "JES_up"));
-
-	AllSamples jesDown("JES_down", "_minusJES");
-	xsects.push_back(readAndFit(jesDown, absEta, "JES_down"));
-
-	AllSamples jerUp("JER_up", "_plusJER");
-	xsects.push_back(readAndFit(jerUp, absEta, "JER_up"));
-
-	AllSamples jerDown("JER_down", "_minusJER");
-	xsects.push_back(readAndFit(jerDown, absEta, "JER_down"));
-
-	AllSamples puUp("PU_up", "_PU_72765mb");
-	xsects.push_back(readAndFit(puUp, absEta, "PU_up"));
-
-	AllSamples pudown("PU_down", "_PU_65835mb");
-	xsects.push_back(readAndFit(pudown, absEta, "PU_down"));
-
-	AllSamples bjetUp("BJet_up", "_plusBjet");
-	xsects.push_back(readAndFit(bjetUp, absEta, "BJet_up"));
-
-	AllSamples bjetDown("BJet_down", "_minusBJet");
-	xsects.push_back(readAndFit(bjetDown, absEta, "BJet_down"));
-
-	AllSamples ljetUp("LightJet_up", "_plusLightJet");
-	xsects.push_back(readAndFit(ljetUp, absEta, "LightJet_up"));
-
-	AllSamples ljetDown("LightJet_down", "_minusLightJet");
-	xsects.push_back(readAndFit(ljetDown, absEta, "LightJet_down"));
-	}
-	
-	if(m3 == true){	
-	//could perhaps turn this into an iterator over all samples
-	AllSamples samples("central", "");
-	xsects.push_back(readAndFit(samples, M3, "central"));
-
-	AllSamples jesUp("JES_up", "_plusJES");
-	xsects.push_back(readAndFit(jesUp, M3, "JES_up"));
-
-	AllSamples jesDown("JES_down", "_minusJES");
-	xsects.push_back(readAndFit(jesDown, M3, "JES_down"));
-
-	AllSamples jerUp("JER_up", "_plusJER");
-	xsects.push_back(readAndFit(jerUp, M3, "JER_up"));
-
-	AllSamples jerDown("JER_down", "_minusJER");
-	xsects.push_back(readAndFit(jerDown, M3, "JER_down"));
-
-	AllSamples puUp("PU_up", "_PU_72765mb");
-	xsects.push_back(readAndFit(puUp, M3, "PU_up"));
-
-	AllSamples pudown("PU_down", "_PU_65835mb");
-	xsects.push_back(readAndFit(pudown, M3, "PU_down"));
-
-	AllSamples bjetUp("BJet_up", "_plusBjet");
-	xsects.push_back(readAndFit(bjetUp, M3, "BJet_up"));
-
- 	AllSamples bjetDown("BJet_down", "_minusBJet");
- 	xsects.push_back(readAndFit(bjetDown, M3, "BJet_down"));
-
-	AllSamples ljetUp("LightJet_up", "_plusLightJet");
-	xsects.push_back(readAndFit(ljetUp, M3, "LightJet_up"));
-
-	AllSamples ljetDown("LightJet_down", "_minusLightJet");
-	xsects.push_back(readAndFit(ljetDown, M3, "LightJet_down"));
-	}
-	
-	if(mlb == true){	
-	//could perhaps turn this into an iterator over all samples
-	AllSamples samples("central", "");
-	xsects.push_back(readAndFit(samples, Mlb, "central"));
-
-	AllSamples jesUp("JES_up", "_plusJES");
-	xsects.push_back(readAndFit(jesUp, Mlb, "JES_up"));
-
-	AllSamples jesDown("JES_down", "_minusJES");
-	xsects.push_back(readAndFit(jesDown, Mlb, "JES_down"));
-
-	AllSamples jerUp("JER_up", "_plusJER");
-	xsects.push_back(readAndFit(jerUp, Mlb, "JER_up"));
-
-	AllSamples jerDown("JER_down", "_minusJER");
-	xsects.push_back(readAndFit(jerDown, Mlb, "JER_down"));
-
-	AllSamples puUp("PU_up", "_PU_72765mb");
-	xsects.push_back(readAndFit(puUp, Mlb, "PU_up"));
-
-	AllSamples pudown("PU_down", "_PU_65835mb");
-	xsects.push_back(readAndFit(pudown, Mlb, "PU_down"));
-
-	AllSamples bjetUp("BJet_up", "_plusBjet");
-	xsects.push_back(readAndFit(bjetUp, Mlb, "BJet_up"));
-
-	AllSamples bjetDown("BJet_down", "_minusBJet");
-	xsects.push_back(readAndFit(bjetDown, Mlb, "BJet_down"));
-
-	AllSamples ljetUp("LightJet_up", "_plusLightJet");
-	xsects.push_back(readAndFit(ljetUp, Mlb, "LightJet_up"));	
-
-	AllSamples ljetDown("LightJet_down", "_minusLightJet");
-	xsects.push_back(readAndFit(ljetDown, Mlb, "LightJet_down"));
-	
-	}
-
-	TString syst[11] = {"central", "JES up", "JES down", "JER up", "JER down", "PU up", "PU down", "BJet up", "BJet down", "LightJet up", "LightJet down"};
-	cout << "Syst. & \\sigma & syst.uncrt (\\%)  \\\\" << endl;
-//	double error = 0;
-	double errorUp = 0;
-	double errorDown = 0;
-	for(unsigned int i = 0; i < xsects.size(); i++){
-		//cout << xsects.at(i) << endl;
-	
-
-			errorUp = pow(xsects.at(1)-xsects.at(0),2) + pow(xsects.at(3)-xsects.at(0),2) + pow(xsects.at(5)-xsects.at(0),2) + pow(xsects.at(7)-xsects.at(0),2) +
-			pow(xsects.at(9)-xsects.at(0),2);
-			errorDown = pow(xsects.at(2)-xsects.at(0),2) + pow(xsects.at(4)-xsects.at(0),2) + pow(xsects.at(6)-xsects.at(0),2) + pow(xsects.at(8)-xsects.at(0),2)
-			+ pow(xsects.at(10)-xsects.at(0),2);
-			
-			//error += pow(xsects.at(i)-xsects.at(0),2);
-			
-			cout << syst[i] << " & " << xsects.at(i) << " & " << ((xsects.at(i) - xsects.at(0))/xsects.at(0))*100 << " \\\\" << endl;
-		
-	}
-	cout << "xsect = " << xsects.at(0) << " & \\pm" << (sqrt(errorUp)+sqrt(errorDown))/2 << endl;
-	
-
-}
-
-
-double Fit::readAndFit(AllSamples samples, Variable variable, TString syst_folder){
+double multiFit::readAndFit(AllSamples samples, Variable variable, TString syst_folder){
 
 	//Put various samples here
 	readHistos(samples, variable);
-
+ 
 	double xsect = doFit(samples, variable, syst_folder);
+
 	
 	if(syst_folder == "central"){
 	TH1D* data = samples.single_mu_data->histo;
@@ -356,14 +174,17 @@ double Fit::readAndFit(AllSamples samples, Variable variable, TString syst_folde
 	return xsect;
 }
 
-double Fit::doFit(AllSamples samples, Variable variable, TString syst_folder){
+
+
+double multiFit::doFit(AllSamples samples, Variable variable, TString syst_folder){
 
 	//readHistos(samples, variable);
 	//draw the templates used in the fit
 	drawTemplates(samples, variable, syst_folder);
 
-
 	TH1D* data = samples.single_mu_data->histo;
+
+	
 	TH1D* vjets = samples.vjets->histo;
 	TH1D* qcd =   samples.qcd->histo;
 	TH1D* signal = samples.signal->histo;
@@ -385,7 +206,9 @@ double Fit::doFit(AllSamples samples, Variable variable, TString syst_folder){
 	double Nsingle_t = single_t->Integral();
 	double Nbg  = vjets->IntegralAndError(0, signal->GetNbinsX()+1, Nbg_err);
 	double Nqcd = qcd->IntegralAndError(0, signal->GetNbinsX()+1, Nqcd_err);
+	
 	double Ntotal = data->Integral();
+
 
 	TVirtualFitter* fitter = TVirtualFitter::Fitter(0,3);
 	fitter->SetFCN(fcn);
@@ -398,6 +221,9 @@ double Fit::doFit(AllSamples samples, Variable variable, TString syst_folder){
 	fitter->SetParameter(2,"Nqcd", Nqcd, Nqcd_err,0,Ntotal);
 
 	TH1D* fit_histos[4] = {data, signal, vjets, qcd};//qcd_data
+
+	
+	
 	TObjArray fithists(0);
 	for(int i =0; i<4; i++){
 		fithists.Add(fit_histos[i]);
@@ -426,23 +252,26 @@ double Fit::doFit(AllSamples samples, Variable variable, TString syst_folder){
 	  	signal->Scale(results[0]/Ntop);
 		vjets->Scale(results[1]/Nbg);	
 		
-		if(abseta == true)	
+		if(variable.name == "muon_AbsEta")	
 			qcd_data->Scale(results[2]/Nqcd);
 		else 
 			qcd->Scale(results[2]/Nqcd);
 		
 		TH1D* bkgd = (TH1D*) vjets->Clone("vjets");
-		if(Globals::qcdFromData){
+		if(variable.name == "muon_AbsEta"){
 			bkgd->Add(qcd_data);
 		} else
 			bkgd->Add(qcd);
 		
 		TCanvas *c3 = new TCanvas("Plot","Plot",900, 600);
-
+		
+		TPad *pad1 = new TPad("pad1","pad1",0,0,1,1);
+			
+			c3->cd();
+			pad1->Draw();
+			pad1->cd();
+			
 		  THStack* sum_fit = new THStack("sum fit","stacked histograms"); //used for stack plot
-//		  sum_fit->Add(qcd_data);sum_fit->Add(vjets);sum_fit->Add(signal);
-//		  sum_fit->Add(qcd);sum_fit->Add(vjets);sum_fit->Add(signal);
-//		  sum_fit->Add(vjets);sum_fit->Add(signal);
 		  sum_fit->Add(bkgd); sum_fit->Add(signal);
 		  sum_fit->Draw("hist");
 		  data->Draw("E same");
@@ -461,9 +290,6 @@ double Fit::doFit(AllSamples samples, Variable variable, TString syst_folder){
 			tleg->SetFillColor(10);
 
 			tleg->AddEntry(signal , "signal", "f");
-//			tleg->AddEntry(vjets , "v+jets", "f");
-//			tleg->AddEntry(qcd , "QCD", "f");
-//			tleg->AddEntry(qcd_data , "QCD", "f");
 			tleg->AddEntry(bkgd, "bkgd", "f");
 	 		tleg->Draw("same");
 
@@ -472,18 +298,19 @@ double Fit::doFit(AllSamples samples, Variable variable, TString syst_folder){
 			TText* textPrelim = doPrelim(0.58,0.96);
 			textPrelim->Draw();
 
+
+
 		    c3->SaveAs("Plots/"+folder+"/"+objName+"/"+syst_folder+"/"+variable.name+"_fit.pdf");
 		    c3->SaveAs("Plots/"+folder+"/"+objName+"/"+syst_folder+"/"+variable.name+"_fit.png");
+		
 		    delete c3;
 
 		    double xsect = (results[0]-Nsingle_t)*245.8/Nttbar;
 
-//		    cout << "xsect is: " << xsect << endl;
 		    return xsect;
 }
 
-
-void Fit::drawTemplates(AllSamples samples, Variable variable, TString syst_folder){
+void multiFit::drawTemplates(AllSamples samples, Variable variable, TString syst_folder){
 
 	TH1D* signal = (TH1D*)samples.signal->histo->Clone("signal");
 	TH1D* vjets = (TH1D*)samples.vjets->histo->Clone("vjets");
@@ -495,7 +322,7 @@ void Fit::drawTemplates(AllSamples samples, Variable variable, TString syst_fold
 	qcd_data->Scale(qcd->Integral()/qcd_data->Integral());
 
 	TH1D* bkgd = (TH1D*)vjets->Clone("vjets");
-	if(abseta == true)
+	if(variable.name == "muon_AbsEta")
 		bkgd->Add(qcd_data);
 	else		
 		bkgd->Add(qcd);
@@ -522,9 +349,6 @@ void Fit::drawTemplates(AllSamples samples, Variable variable, TString syst_fold
 		tleg->SetFillColor(10);
 
 		tleg->AddEntry(signal , "signal", "l");
-//		tleg->AddEntry(vjets , "v+jets", "l");
-//		tleg->AddEntry(qcd , "QCD", "l");
-//		tleg->AddEntry(qcd_data , "QCD", "l");
 		tleg->AddEntry(bkgd, "bkgd", "l");
 	 	tleg->Draw("same");
 
@@ -543,7 +367,7 @@ void Fit::drawTemplates(AllSamples samples, Variable variable, TString syst_fold
 
 }
 
-void Fit::normAndColor(TH1D* hist, Sample sample){
+void multiFit::normAndColor(TH1D* hist, Sample sample){
 
 	hist->Scale(1./hist->Integral());
 	hist->SetMarkerStyle(0);
@@ -552,9 +376,8 @@ void Fit::normAndColor(TH1D* hist, Sample sample){
 	hist->SetFillColor(kWhite);
 }
 
-TH1D* Fit::readHistogram(Sample sample, Variable variable, bool btag) {
+TH1D* multiFit::readHistogram(Sample sample, Variable variable, bool btag) {
 
-// 	if(abseta == true){
 		cout << "plot: " << selection+objName+"/"+variable.name << endl;
 		
 		TH1D* plot = (TH1D*) sample.file->Get(selection+objName+"/"+variable.name+"_2btags");
@@ -566,18 +389,11 @@ TH1D* Fit::readHistogram(Sample sample, Variable variable, bool btag) {
 
 		plot->Add(plot2);
 		plot->Add(plot3);
-	
+
 		if(btag == false){
 			plot->Add(plot4);
 			plot->Add(plot5);
 		}
-//	}
-
-//	if(m3 == true || mlb == true){
-//		cout << "plot: " << selection+variable.name << endl;
-
-//		TH1D* plot = (TH1D*) sample.file->Get(selection+variable.name);
-//	}
 
 
 	plot->SetFillColor(sample.fillColor);
@@ -594,27 +410,34 @@ TH1D* Fit::readHistogram(Sample sample, Variable variable, bool btag) {
 	return plot;
 }
 
-void Fit::addOverFlow(TH1D* overflow, Variable variable){
+TH1D* multiFit::readHistogram2(Sample sample, Variable variable, bool btag) {
 
-	if(variable.minX > -0.1){
-		int bin = variable.maxX/overflow->GetBinWidth(1);
-		double error;
 
-		double overflow_val = overflow->IntegralAndError(bin, overflow->GetNbinsX()+1, error);
+	cout << "plot: " << selection+variable.name << endl;
 
-		overflow->SetBinContent(bin, overflow_val);
-		overflow->SetBinError(bin, error);
-	}
+	TH1D* plot = (TH1D*) sample.file->Get(selection+variable.name);
+
+
+	plot->SetFillColor(sample.fillColor);
+	plot->SetLineColor(sample.lineColor);
+
+	if(Globals::addOverFlow)
+		addOverFlow(plot, variable);
+
+	plot->Rebin(variable.rebinFact);
+
+	cout << "bins X: " << sample.name << " - " << plot->GetNbinsX() << endl;
+
+
+	return plot;
 }
 
+void multiFit::readHistos(AllSamples samples, Variable variable){
 
-void Fit::readHistos(AllSamples samples, Variable variable){
-
-
-	if(variable.name == "muon_AbsEta"){ 
-	
+		//for abseta
+		if(variable.name == "muon_AbsEta"){
 		setSelection("TTbar_plus_X_analysis/MuPlusJets/Ref selection/");
-		
+
 		TH1D* data = readHistogram(*samples.single_mu_data, variable, true);
 		TH1D* vjets = readHistogram(*samples.vjets, variable, true);
 		TH1D* qcd = readHistogram(*samples.qcd, variable, true);
@@ -645,18 +468,17 @@ void Fit::readHistos(AllSamples samples, Variable variable){
 		samples.signal->SetHistoGe4j(signal_ge4j);
 		samples.vjets->SetHistoGe4j(vjets_ge4j);
 		samples.qcd->SetHistoGe4j(qcd_ge4j);
-		
-	} 
+		}
+		//for mlb or m3
 	
-	if(variable.name == "M3" || variable.name == "invariant_mass_lepton_1bjet"){
-	
+		if(variable.name == "M3" || variable.name == "invariant_mass_lepton_1bjet"){
 		setSelection("DiffVariablesAnalyser/MuPlusJets/");
-		
-		TH1D* data = readHistogram(*samples.single_mu_data, variable, false);
-		TH1D* vjets = readHistogram(*samples.vjets, variable, false);
-		TH1D* qcd = readHistogram(*samples.qcd, variable, false);
-		TH1D* ttbar = readHistogram(*samples.ttbar, variable, false);
-		TH1D* single_t = readHistogram(*samples.single_t, variable, false);
+
+		TH1D* data = readHistogram2(*samples.single_mu_data, variable, false);
+		TH1D* vjets = readHistogram2(*samples.vjets, variable, false);
+		TH1D* qcd = readHistogram2(*samples.qcd, variable, false);
+		TH1D* ttbar = readHistogram2(*samples.ttbar, variable, false);
+		TH1D* single_t = readHistogram2(*samples.single_t, variable, false);
 		TH1D* signal = (TH1D*) ttbar->Clone("signal");
 		signal->Add(single_t);
 		
@@ -666,13 +488,13 @@ void Fit::readHistos(AllSamples samples, Variable variable){
 		samples.signal->SetHisto(signal);
 		samples.vjets->SetHisto(vjets);
 		samples.qcd->SetHisto(qcd);
-	
-	}
+		}
+
 	
 
 }
 
-THStack* Fit::buildStack(AllSamples samples, Variable variable){
+THStack* multiFit::buildStack(AllSamples samples, Variable variable){
 
 	THStack *hs = new THStack("hs","test");
 
@@ -684,7 +506,7 @@ THStack* Fit::buildStack(AllSamples samples, Variable variable){
 	return hs;
 }
 
-TH1D* Fit::allMChisto(AllSamples samples, Variable variable){
+TH1D* multiFit::allMChisto(AllSamples samples, Variable variable){
 
 	TH1D *allMC = (TH1D*)samples.ttbar->histo->Clone("ratio plot");
 
@@ -695,7 +517,7 @@ TH1D* Fit::allMChisto(AllSamples samples, Variable variable){
 	return allMC;
 }
 
-void Fit::standardPlot(TH1D* data, THStack *hs, AllSamples samples, Variable variable){
+void multiFit::standardPlot(TH1D* data, THStack *hs, AllSamples samples, Variable variable){
 	//Style
 	TdrStyle style;
 	style.setTDRStyle();
@@ -743,7 +565,7 @@ void Fit::standardPlot(TH1D* data, THStack *hs, AllSamples samples, Variable var
 	delete textPrelim;
 }
 
-void Fit::ratioPlot(TH1D* data, THStack *hs, AllSamples samples, Variable variable){
+void multiFit::ratioPlot(TH1D* data, THStack *hs, AllSamples samples, Variable variable){
 	//draw histos with ratio plot
 	float r = 0.3;
 	float epsilon = 0.02;
@@ -832,7 +654,7 @@ void Fit::ratioPlot(TH1D* data, THStack *hs, AllSamples samples, Variable variab
 	delete textPrelim;
 }
 
-TH1D* Fit::hashErrors(AllSamples samples, Variable variable){
+TH1D* multiFit::hashErrors(AllSamples samples, Variable variable){
 	TH1D * hashErrors = allMChisto(samples, variable);
 
 	hashErrors->SetFillColor(kBlack);
@@ -843,7 +665,7 @@ TH1D* Fit::hashErrors(AllSamples samples, Variable variable){
 	return hashErrors;
 }
 
-TLegend* Fit::legend(AllSamples samples){
+TLegend* multiFit::legend(AllSamples samples){
 
 		TLegend *tleg;
 		tleg = new TLegend(0.75,0.75,0.85,0.9);
@@ -859,7 +681,21 @@ TLegend* Fit::legend(AllSamples samples){
 		return tleg;
 }
 
-TText* Fit::doChan(double x_pos,double y_pos){
+
+void multiFit::addOverFlow(TH1D* overflow, Variable variable){
+
+	if(variable.minX > -0.1){
+		int bin = variable.maxX/overflow->GetBinWidth(1);
+		double error;
+
+		double overflow_val = overflow->IntegralAndError(bin, overflow->GetNbinsX()+1, error);
+
+		overflow->SetBinContent(bin, overflow_val);
+		overflow->SetBinError(bin, error);
+	}
+}
+
+TText* multiFit::doChan(double x_pos,double y_pos){
 
 	  ostringstream stream;
 	  stream  << "#mu, #geq 4 jets, #geq 2 btags";
@@ -872,7 +708,7 @@ TText* Fit::doChan(double x_pos,double y_pos){
 	  return text;
 }
 
-TText* Fit::doPrelim(double x_pos,double y_pos){
+TText* multiFit::doPrelim(double x_pos,double y_pos){
 
 	  ostringstream stream;
 	  stream  << "CMS Preliminary, L = "+Globals::lumi;
@@ -885,7 +721,7 @@ TText* Fit::doPrelim(double x_pos,double y_pos){
 	  return text;
 }
 
-void Fit::setSelection(TString sel_name){
+void multiFit::setSelection(TString sel_name){
 	selection = sel_name;
 }
 

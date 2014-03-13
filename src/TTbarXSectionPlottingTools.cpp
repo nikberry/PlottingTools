@@ -11,7 +11,7 @@
 #include "../interface/Objects/Muon.h"
 #include "../interface/Objects/Jets.h"
 #include "../interface/Objects/CutFlow.h"
-#include "../interface/Objects/Fit.h"
+#include "../interface/Objects/multiFit.h"
 
 using namespace std;
 
@@ -36,8 +36,8 @@ int main() {
 //	cutflow.allPlots(samples);
 
 //	do not do muon plots and fits at the same time as it messes up the eta distn.
-	Fit fit;
-	fit.allFits();
+	multiFit multifit;
+	multifit.allFits();
 
 	return 0;
 
